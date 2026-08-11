@@ -42,15 +42,36 @@ No hay build ni dependencias: se edita el HTML y se copia al servidor.
 > **Esta propiedad es compartida.** Los otros dos flujos son `agro.k2.com.pe` y
 > `observatorio.k2.com.pe`. El ID de medición distingue el flujo, pero **sesiones, usuarios,
 > atribución y conversiones se calculan a nivel de propiedad**. Para separar por landing en los
-> informes se segmenta por `hostname`, no por propiedad. El pixel de Meta también es compartido con
-> el observatorio.
->
-> Consecuencia práctica: **`Lead` y `generate_lead` quedan reservados para esta landing**, que es
-> donde hay intención comercial. El observatorio emite `Subscribe` /
-> `newsletter_subscribe_success` para su suscripción al reporte. Si ambos dijeran `Lead`, las
-> campañas de Meta optimizadas a esa conversión perseguirían suscriptores de newsletter —mucho más
-> baratos— y degradarían la calidad del lead comercial, porque Meta y GA4 optimizan por **nombre de
-> evento**, no por `content_name`.
+> informes se segmenta por `hostname`, no por propiedad.
+
+### El dataset de Meta también es compartido — y es deliberado
+
+`1290749182534707` es el mismo para minería, agro y observatorio desde el 11-ago-2026. La
+recomendación de Meta es **un solo dataset** aunque haya varios dominios de una misma marca: el
+dataset clasifica por *evento*, no por instalación. Separar fragmenta públicos y señal, y eso
+pesa más cuanto menor es el volumen — acá el ticket es alto y los leads son pocos.
+
+Lo que sí se separa es el **nombre del evento**, porque una campaña optimiza hacia uno:
+
+| Landing | Evento en Meta | Distintivo |
+|---|---|---|
+| **minería (esta)** | `Lead` | `content_category: 'mineria'` |
+| agro | `Lead` | `content_category: 'agro'` |
+| observatorio | `CompleteRegistration` | `content_category: 'observatorio'` |
+
+**`Lead` queda reservado para las dos landings comerciales.** El observatorio entrega un reporte
+gratuito, no una oportunidad comercial: si dijera `Lead`, una campaña de minería optimizada a esa
+conversión perseguiría suscriptores de newsletter, mucho más baratos, y degradaría la calidad del
+lead comercial.
+
+Se separa por nombre de evento y no por conversión personalizada con regla de URL, a propósito:
+las reglas de URL dependen de `event_source_url`, que es justo lo que se degrada al enviar
+eventos desde servidor con CAPI. Un nombre distinto viaja intacto por ambas vías.
+
+> **Ojo con un mito:** que compartan dataset **no** es lo que habilita retargetear en minería a
+> quien leyó el observatorio. Los públicos personalizados son activos de la **cuenta
+> publicitaria**, no del dataset. Compartir dataset aporta otras cosas (pool de público más denso,
+> mejor calidad de coincidencia, una sola tubería de CAPI), pero no eso.
 
 ### Tráfico que llega desde el observatorio
 
@@ -83,7 +104,7 @@ deseadas* de los tres flujos (el ajuste es por flujo, no por propiedad).
 | `scroll` | 25 / 50 / 75 / 90 % | `percent_scrolled` |
 | `section_view` | Sección visible al 30 % | `section_id` |
 | `back_to_site_click` | Clic a k2.com.pe desde gracias | `from` |
-| `Lead` (Meta) | En `gracias.html` | `value`, `currency`, `content_name`, `eventID` |
+| `Lead` (Meta) | En `gracias.html` | `value`, `currency`, `content_category:'mineria'`, `content_name`, `eventID` |
 
 **Valores de `cta_id`:** `nav`, `hero`, `servicio_vigilancia`, `servicio_resguardo`,
 `servicio_especiales`, `servicio_consultoria`, `servicio_monitoreo`, `cta_final`, `sticky_movil`.

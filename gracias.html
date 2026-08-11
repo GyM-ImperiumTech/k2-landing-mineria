@@ -55,7 +55,7 @@ if (_eid) {
   var _yaDisparado = false;
   try { _yaDisparado = sessionStorage.getItem('k2_lead_' + _eid) === '1'; } catch(e){}
   if (!_yaDisparado) {
-    fbq('track','Lead',{currency:'PEN', value:1, content_name: _variant},{eventID: _eid});
+    fbq('track','Lead',{currency:'PEN', value:1, content_category:'mineria', content_name: _variant},{eventID: _eid});
     try { sessionStorage.setItem('k2_lead_' + _eid, '1'); } catch(e){}
   }
 }
