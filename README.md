@@ -39,6 +39,38 @@ No hay build ni dependencias: se edita el HTML y se copia al servidor.
 
 **Propiedad GA4:** `K2 Landings Pauta B2B (Minería + Agro)` — `535465340`, stream `14771431341`.
 
+> **Esta propiedad es compartida.** Los otros dos flujos son `agro.k2.com.pe` y
+> `observatorio.k2.com.pe`. El ID de medición distingue el flujo, pero **sesiones, usuarios,
+> atribución y conversiones se calculan a nivel de propiedad**. Para separar por landing en los
+> informes se segmenta por `hostname`, no por propiedad. El pixel de Meta también es compartido con
+> el observatorio.
+>
+> Consecuencia práctica: **`Lead` y `generate_lead` quedan reservados para esta landing**, que es
+> donde hay intención comercial. El observatorio emite `Subscribe` /
+> `newsletter_subscribe_success` para su suscripción al reporte. Si ambos dijeran `Lead`, las
+> campañas de Meta optimizadas a esa conversión perseguirían suscriptores de newsletter —mucho más
+> baratos— y degradarían la calidad del lead comercial, porque Meta y GA4 optimizan por **nombre de
+> evento**, no por `content_name`.
+
+### Tráfico que llega desde el observatorio
+
+`observatorio.k2.com.pe` es el activo editorial de branding y deriva tráfico acá. Sus CTA agregan
+`?via=observatorio&via_cta=<botón>`, y esta landing los lee y los pasa al `config` de GA4 para que
+los herede todo evento de la página, incluido `generate_lead`. Se guardan en `sessionStorage` y
+viajan en el redirect a `gracias.html`, donde se emite el `Lead` de Meta.
+
+Dos cosas que no son obvias:
+
+- **GA4 no convierte parámetros de URL en parámetros de evento.** Sin ese paso manual la dimensión
+  personalizada *"Origen interno via"* quedaría siempre vacía.
+- **`via` a propósito no es un `utm_*`.** En GA4 un cambio de campaña abre sesión nueva y pisa la
+  fuente de adquisición original: un visitante que llegó por búsqueda orgánica al observatorio y
+  hace clic acá quedaría reatribuido, y la campaña real desaparecería del reporte. Ese fue el error
+  del viejo `utm_source=k2-branding`.
+
+Para que la sesión sobreviva el salto entre subdominios, `k2.com.pe` está en *referencias no
+deseadas* de los tres flujos (el ajuste es por flujo, no por propiedad).
+
 ### Eventos que emite
 
 | Evento | Cuándo | Parámetros |
