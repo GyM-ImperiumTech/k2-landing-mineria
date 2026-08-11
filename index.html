@@ -23,10 +23,26 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-JBNFWR6V2T', {
-    send_page_view: true,
-    cookie_flags: 'SameSite=None;Secure'
-  });
+
+  // `via` marca qué activo interno de K2 derivó la visita (hoy solo el observatorio,
+  // que lo agrega a sus enlaces salientes). GA4 NO convierte parámetros de URL en
+  // parámetros de evento: si no se pasan a mano acá, la dimensión personalizada
+  // "Origen interno via" queda vacía para siempre.
+  // Van en el config para que los herede TODO evento de la página, incluido
+  // generate_lead — que es el que interesa cruzar contra el origen.
+  // Se guardan en sessionStorage porque el envío del formulario redirige a
+  // gracias.html y ahí la URL ya no trae el parámetro.
+  var cfgGa4 = { send_page_view: true, cookie_flags: 'SameSite=None;Secure' };
+  (function(){
+    try {
+      var p = new URLSearchParams(window.location.search);
+      ['via','via_cta'].forEach(function(k){
+        var v = p.get(k) || sessionStorage.getItem('k2_' + k) || '';
+        if (v) { cfgGa4[k] = v; try { sessionStorage.setItem('k2_' + k, v); } catch(e){} }
+      });
+    } catch(e){}
+  })();
+  gtag('config', 'G-JBNFWR6V2T', cfgGa4);
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1876,11 +1892,18 @@
     // generamos uno en cliente para no perder el Lead de Meta (antes se perdía).
     // crm=0 permite medir en GA4/Meta cuántos envíos no llegaron al CRM.
     const eventId = leadId || ('k2-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10));
+    // `via` viaja también a gracias.html: ahí se emite el Lead de Meta y se mide la
+    // vista de la página de conversión, así que sin esto el origen se perdería justo
+    // en el evento que importa.
+    const viaOrigen = (() => { try { return sessionStorage.getItem('k2_via') || ''; } catch(e){ return ''; } })();
+    const viaCta = (() => { try { return sessionStorage.getItem('k2_via_cta') || ''; } catch(e){ return ''; } })();
     const qs = new URLSearchParams({
       ...utms,
       id: eventId,
       crm: leadId ? '1' : '0',
       variant: pageVariant,
+      ...(viaOrigen ? { via: viaOrigen } : {}),
+      ...(viaCta ? { via_cta: viaCta } : {}),
     }).toString();
     window.location.href = 'gracias.html' + (qs ? ('?' + qs) : '');
   });

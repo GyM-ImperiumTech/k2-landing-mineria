@@ -20,7 +20,21 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-JBNFWR6V2T');
+
+  // Ver la nota en index.html: `via` identifica qué activo interno derivó la visita.
+  // Acá se lee de la URL (el redirect del formulario lo arrastra) o de sessionStorage,
+  // para que la página de conversión también lo reporte.
+  var cfgGa4 = {};
+  (function(){
+    try {
+      var p = new URLSearchParams(window.location.search);
+      ['via','via_cta'].forEach(function(k){
+        var v = p.get(k) || sessionStorage.getItem('k2_' + k) || '';
+        if (v) cfgGa4[k] = v;
+      });
+    } catch(e){}
+  })();
+  gtag('config', 'G-JBNFWR6V2T', cfgGa4);
 </script>
 <!-- Facebook Pixel Code -->
 <script>
