@@ -1614,6 +1614,9 @@
   // ====== FORM ABANDONMENT TRACKING ======
   let formSubmitted = false;
 
+  // Destino: /abandono-intake -> nginx lo proxea a Hermes (integracion propia,
+  // pipeline "Abandonos de formulario", con la API key del lado del servidor).
+  // Antes iba a /api/form-sessions, en el CRM local que quedo de baja.
   function captureSession() {
     if (formSubmitted) return;
     const nombre   = (document.getElementById('nombre')?.value   || '').trim();
@@ -1635,7 +1638,7 @@
       pagina:   window.location.href,
     });
 
-    navigator.sendBeacon('/api/form-sessions', new Blob([payload], { type: 'application/json' }));
+    navigator.sendBeacon('/abandono-intake', new Blob([payload], { type: 'application/json' }));
   }
 
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') captureSession(); });
