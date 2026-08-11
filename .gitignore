@@ -1,0 +1,5 @@
+*.PRE-*
+*.bak
+*.bak-*
+*.old
+.env
