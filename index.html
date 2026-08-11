@@ -1303,6 +1303,7 @@
 
       <div class="form-group consent-group">
         <label class="checkbox-label">
+          <input type="hidden" name="variant" value="A">
           <input type="checkbox" id="consent" name="consent" required>
           Acepto recibir comunicaciones comerciales de K2 Seguridad. Puedo darme de baja en cualquier momento.
         </label>
@@ -1791,6 +1792,12 @@
     if(typeof gtag === 'function') gtag('event','form_submit_attempt',{form_id:'lead-form', valid: ok});
     if(!ok){
       showToast('Revisa los campos marcados en rojo');
+      if(typeof gtag === 'function'){
+        document.querySelectorAll('#lead-form .field.invalid').forEach(function(w){
+          var inp = w.querySelector('input[id],select[id],textarea[id]');
+          gtag('event','form_error',{field: inp ? inp.id : '?', at: 'submit', form_id: 'lead-form'});
+        });
+      }
       if(firstBad){
         const input = firstBad.querySelector('.input, .textarea');
         const rect = firstBad.getBoundingClientRect();
