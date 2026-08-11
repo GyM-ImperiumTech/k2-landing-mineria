@@ -121,3 +121,24 @@ temporal de 60 segundos). No hay CI/CD.
 
 **Convención:** antes de sobrescribir, backup en el servidor como
 `index.html.PRE-<CAMBIO>-<AAAAMMDD>`. Esos backups viven en el servidor, no en el repo.
+
+---
+
+## Backend: a dónde va el lead
+
+`POST /crm-intake` → nginx lo proxea a **Hermes** (`hermes.imperiumtech.ai/api/intake/<id>`),
+con la API key en un header del lado del servidor. Responde `{ ok: true, id: "K2-NNN" }`.
+
+> **Hermes es el único CRM.** `crm.k2.com.pe` (el LeadFlow local) está **de baja**: dejó de
+> recibir leads de landing el 17-jul-2026, cuando se configuró el proxy. No usar su base para
+> nada analítico — quedó congelada y no refleja el volumen real.
+
+### ⚠️ Pendiente antes de apagar el CRM local
+
+La captura de abandono de este formulario (`navigator.sendBeacon('/api/form-sessions')`) pega
+al app local en el puerto 3001, **no a Hermes**. Cuando esa instancia se apague, el beacon va a
+fallar **en silencio**: la landing no muestra error y tampoco emite evento a GA4.
+
+Hay 449 registros de abandono acumulados ahí (nombre, teléfono, RUC, empresa, UTMs) que se
+pierden si no se migran. Al migrar, apuntar el beacon a Hermes y agregar un evento
+`form_abandon` a GA4 para que la caída sea visible.
