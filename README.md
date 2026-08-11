@@ -11,7 +11,7 @@ leads al CRM K2 LeadFlow.
 | **En vivo** | https://mineria.k2.com.pe |
 | **Servidor** | EC2 `k2-leads-app` (`i-045a1579dad9fc01d`, 3.88.80.218) |
 | **Ruta** | `/var/www/landing` |
-| **vhost** | `/etc/nginx/sites-enabled/landing` |
+| **vhost** | `/etc/nginx/sites-available/default` ⚠️ **no es `landing`** |
 
 ---
 
@@ -127,6 +127,46 @@ existen por eso:
    vez que el CRM fallaba, mientras GA4 sí contaba el lead.
 4. **Verificar con la caché desactivada** y confirmar en GA4 DebugView. No aceptar un "ya está"
    sin captura de Network.
+
+---
+
+## Infraestructura: dos trampas verificadas el 11-ago-2026
+
+**1. `mineria.k2.com.pe` lo sirve el vhost `default`, no `landing`.** Existe un archivo
+`/etc/nginx/sites-available/landing`, pero **no es el que atiende este dominio** — el `server_name`
+está declarado en `default`, que se carga antes por orden alfabético. Buscar ahí los bloques
+`location` o editar `landing` esperando efecto es perder el tiempo.
+
+**2. No dejar respaldos de vhost dentro de `sites-enabled`.** nginx carga *todo* lo que hay en esa
+carpeta, así que archivos como `default.PRE-CAMBIO-20260811` se cargan **como configuración viva**
+y generan `conflicting server name`. nginx ignora el duplicado y sigue el primero que cargó, así
+que aparenta funcionar — hasta que un cambio de nombre altera el orden y empieza a servir otro
+bloque. Se encontraron 6 respaldos así, con 19 warnings; se movieron a `/etc/nginx/respaldos/`.
+
+Los respaldos van fuera de `sites-enabled`. Siempre.
+
+---
+
+## Captura de formularios abandonados
+
+Si alguien escribe nombre o teléfono y se va sin enviar, se captura igual.
+
+```
+visibilitychange / pagehide
+   -> navigator.sendBeacon('/abandono-intake')
+   -> nginx proxea a hermes.imperiumtech.ai/api/intake/c357c799-…
+      (la API key va en un header del lado del servidor, nunca en el navegador)
+   -> Hermes responde 201 Created
+```
+
+En paralelo emite `form_abandon` a GA4 con `ultimo_campo` y `campos_completados`, **sin datos
+personales** — solo el id del campo donde se cayó.
+
+**Hermes deduplica.** Un envío repetido devuelve `200 {"ok":true,"skipped":true,"duplicateOf":…}`
+en vez de `201`. Es correcto, pero significa que un prospecto cuyo teléfono ya exista en la base
+no genera registro nuevo: hay que buscarlo en el lead original.
+
+Verificado de punta a punta el 11-ago-2026 desde navegador real: beacon de 329 bytes → `HTTP 201`.
 
 ---
 
