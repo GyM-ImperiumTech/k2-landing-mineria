@@ -1641,6 +1641,42 @@
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') captureSession(); });
   window.addEventListener('pagehide', captureSession);
 
+  // ====== ABANDONO DE FORMULARIO (GA4) — añadido 11-ago-2026 ======
+  // Hasta ahora el abandono solo se guardaba en la base (captureSession) y no
+  // existía en analítica: no se podía ver cuánta gente se cae ni en qué campo.
+  // Este evento no envía datos personales, solo el id del último campo tocado.
+  (function () {
+    var form = document.getElementById('lead-form');
+    if (!form) return;
+    var ultimoCampo = '', tocados = {}, enviado = false, yaReportado = false;
+
+    function marcar(e) {
+      var el = e.target;
+      if (!el || !el.id || el.type === 'hidden') return;
+      ultimoCampo = el.id;
+      tocados[el.id] = 1;
+    }
+    form.addEventListener('input', marcar, true);
+    form.addEventListener('change', marcar, true);
+    form.addEventListener('submit', function () { enviado = true; }, true);
+
+    function reportarAbandono() {
+      if (enviado || yaReportado || !ultimoCampo) return;
+      yaReportado = true;
+      if (typeof gtag !== 'function') return;
+      gtag('event', 'form_abandon', {
+        ultimo_campo: ultimoCampo,
+        campos_completados: Object.keys(tocados).length,
+        page_variant: (document.querySelector('input[name="variant"]') || {}).value || 'A',
+        transport_type: 'beacon'
+      });
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') reportarAbandono();
+    });
+    window.addEventListener('pagehide', reportarAbandono);
+  })();
+
   // ====== INPUT MASKS ======
   document.getElementById('telefono').addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/^\+?51/, '').replace(/\D/g,'').slice(0,9);
