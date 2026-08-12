@@ -185,8 +185,12 @@ llegaron al CRM.
 
 - **Fricción del formulario:** 7 campos obligatorios para un lead pagado en frío es mucho.
   Exige teléfono **y** email a la vez, y el RUC es obligatorio. Es la fuga medida más grande.
-- **`page_variant` siempre vale "A":** el código lee un `input[name="variant"]` que no existe en
-  el DOM. Cualquier test A/B en esta landing es inmedible hasta que se agregue ese campo.
+- **`page_variant` está listo, solo falta el split.** Verificado en producción el 11-ago-2026:
+  `input[name="variant"]` **sí existe** dentro del formulario, el tagueo lo lee y la dimensión
+  personalizada está registrada en GA4. Hoy vale siempre `"A"` porque nadie lo cambia — minería no
+  tiene mecanismo de reparto. Para un test A/B basta con escribir `"B"` en ese campo según el
+  criterio que se elija; **la medición ya está resuelta.**
+  (Una versión anterior de este README afirmaba que el campo no existía. Era falso.)
 - **`b/index.html` es basura:** remanente del 13-jul con copy viejo. Minería no tiene split A/B
   (el split por cookie `k2ab` es solo de agro). Esa carpeta es accesible en
   `mineria.k2.com.pe/b/`, no está medida y puede recibir tráfico de links viejos. Conviene borrarla.
