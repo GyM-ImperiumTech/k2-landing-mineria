@@ -1138,7 +1138,6 @@
 
 </head>
 <body>
-
 <!-- Urgency bar removida -->
 
 <!-- NAV -->
@@ -1877,7 +1876,7 @@
       });
       if(apiRes.ok){
         const data = await apiRes.json();
-        if(data && data.id) leadId = data.id;
+        if(data && data.leadId) leadId = data.leadId;
       } else {
         console.warn('[K2] API respondió con error:', apiRes.status);
       }
