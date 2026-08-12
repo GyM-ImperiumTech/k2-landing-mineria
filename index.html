@@ -1628,6 +1628,25 @@
     };
   }
 
+
+  // Identificadores de clic de pauta. Viajan al CRM junto con el lead para poder
+  // atribuir despues las conversiones offline (lead calificado, contrato) al
+  // anuncio que las origino. _fbp y _fbc los setea el pixel de Meta; fbclid y
+  // gclid llegan en la URL cuando el visitante viene de un anuncio.
+  function getClickIds(){
+    const p = new URLSearchParams(window.location.search);
+    const ck = n => {
+      const hit = document.cookie.split(';').map(s => s.trim()).find(s => s.startsWith(n + '='));
+      return hit ? hit.slice(n.length + 1) : '';
+    };
+    return {
+      fbp:    ck('_fbp'),
+      fbc:    ck('_fbc'),
+      fbclid: p.get('fbclid') || '',
+      gclid:  p.get('gclid')  || '',
+    };
+  }
+
   // ====== FORM ABANDONMENT TRACKING ======
   let formSubmitted = false;
 
@@ -1651,6 +1670,7 @@
       sector:     (document.getElementById('sector')?.value     || '').trim(),
       comentario: (document.getElementById('comentario')?.value || '').trim(),
       ...utms,
+      ...getClickIds(),
       referrer: document.referrer || '',
       pagina:   window.location.href,
     });
@@ -1839,6 +1859,7 @@
       comentario: document.getElementById('comentario').value.trim(),
       source: 'Landing Minería',
       ...utms,
+      ...getClickIds(),
       referrer: document.referrer || '',
       pagina: window.location.href,
       variant: (document.querySelector('input[name="variant"]')?.value || 'A').toUpperCase(),
@@ -1899,6 +1920,7 @@
     const viaCta = (() => { try { return sessionStorage.getItem('k2_via_cta') || ''; } catch(e){ return ''; } })();
     const qs = new URLSearchParams({
       ...utms,
+      ...getClickIds(),
       id: eventId,
       crm: leadId ? '1' : '0',
       variant: pageVariant,
