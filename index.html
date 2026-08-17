@@ -1652,24 +1652,83 @@
   // Destino: /abandono-intake -> nginx lo proxea a Hermes (integracion propia,
   // pipeline "Abandonos de formulario", con la API key del lado del servidor).
   // Antes iba a /api/form-sessions, en el CRM local que quedo de baja.
-  function captureSession() {
-    if (formSubmitted) return;
-    const nombre   = (document.getElementById('nombre')?.value   || '').trim();
-    const telefono = (document.getElementById('telefono')?.value || '').trim();
-    if (!nombre && !telefono) return;
+  // Identificador de sesión: permite reconocer en el CRM que varios envíos
+  // vienen de la MISMA persona aunque el nombre haya cambiado mientras escribía.
+  const sesionId = (function () {
+    try {
+      if (!sessionStorage.k2sid) sessionStorage.k2sid = Math.random().toString(36).slice(2, 10);
+      return sessionStorage.k2sid;
+    } catch (e) { return Math.random().toString(36).slice(2, 10); }
+  })();
 
-    const utms = getUtms();
+  // ── Cuánto vale lo que hay escrito ────────────────────────────────────────
+  // No se cuentan caracteres: se puntúan señales. Un nombre a medias no sirve
+  // de nada; un teléfono marcable sí. Los umbrales son los mismos que usa
+  // Hermes para decidir si un lead es contactable (7 dígitos, 3 distintos).
+  const telMarcable = (t) => {
+    const d = String(t).replace(/\D/g, '');
+    return d.length >= 7 && d.length <= 15 && new Set(d).size >= 3;
+  };
+  const correoValido = (c) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(String(c));
+  const rucValido = (r) => /^(10|15|16|17|20)\d{9}$/.test(String(r).replace(/\D/g, ''));
+  const nombreReal = (n) => {
+    const s = String(n).trim();
+    if (/(.)\1{3,}/.test(s)) return false;                       // "xxxxxxxx"
+    const letras = (s.match(/[a-záéíóúñü]/gi) || []).length;
+    return letras >= 6 && letras / s.length >= 0.7;              // "b", "hy bu", "D, x xd$"
+  };
+
+  function puntuar(d) {
+    return (telMarcable(d.telefono) ? 3 : 0)
+         + (correoValido(d.email) ? 3 : 0)
+         + (rucValido(d.ruc) ? 2 : 0)
+         + (nombreReal(d.nombre) ? 1 : 0)
+         + (String(d.empresa).trim().length >= 3 ? 1 : 0);
+  }
+  const MINIMO = 3;        // por debajo no hay con qué contactar a nadie
+  const MAX_ENVIOS = 2;
+  const GRACIA_MS = 25000; // margen para quien solo mira el móvil y vuelve
+
+  let envios = 0, mejorPuntaje = -1, temporizador = null;
+
+  function datosActuales() {
+    const v = (id) => (document.getElementById(id)?.value || '').trim();
+    return {
+      nombre: v('nombre'), telefono: v('telefono'), ruc: v('ruc'), puesto: v('puesto'),
+      email: v('email'), empresa: v('empresa'), sector: v('sector'), comentario: v('comentario'),
+    };
+  }
+
+  // ── El arreglo del 17-ago-2026 ────────────────────────────────────────────
+  // `captureSession` solo tenía el guard `formSubmitted`, así que CADA cambio
+  // de pestaña mandaba un envío completo con lo que hubiera escrito hasta ese
+  // momento. Una persona llenando el formulario mientras mira el móvil genera
+  // cuatro leads: el CRM recibió "b", "Bu", "Bu bu", "hy bu" — todos la misma
+  // persona. (La función hermana de GA4, aquí abajo, sí tenía su `yaReportado`.)
+  //
+  // No se arregla con un guard a secas: si te quedas con la PRIMERA captura
+  // guardas el dato más pobre, y si esperas a la última pierdes a quien no
+  // vuelve. Por eso el envío se RETRASA en vez de dispararse al ocultar:
+  //   · se oculta la pestaña  → no manda nada, arranca 25 s de gracia
+  //   · vuelve a verse        → cancela; quien solo miró el móvil no deja rastro
+  //   · vence el temporizador → se fue de verdad: manda
+  //   · pagehide              → manda ya, sin esperar (el disparador principal)
+  function captureSession(motivo) {
+    if (formSubmitted || envios >= MAX_ENVIOS) return;
+    const d = datosActuales();
+    const puntaje = puntuar(d);
+    if (puntaje < MINIMO) return;
+    // Un segundo envío solo si ahora hay MÁS de lo que ya se mandó.
+    if (envios > 0 && puntaje <= mejorPuntaje) return;
+    envios++; mejorPuntaje = puntaje;
+
     const payload = JSON.stringify({
-      nombre,
-      telefono,
-      ruc:        (document.getElementById('ruc')?.value        || '').trim(),
-      puesto:     (document.getElementById('puesto')?.value     || '').trim(),
-      email:      (document.getElementById('email')?.value      || '').trim(),
-      empresa:    (document.getElementById('empresa')?.value    || '').trim(),
-      sector:     (document.getElementById('sector')?.value     || '').trim(),
-      comentario: (document.getElementById('comentario')?.value || '').trim(),
-      ...utms,
+      ...d,
+      ...getUtms(),
       ...getClickIds(),
+      es_parcial: true,
+      comentario: [d.comentario, 'Formulario abandonado · sesión ' + sesionId + ' · captura ' + envios + ' · ' + motivo]
+        .filter(Boolean).join(' — '),
       referrer: document.referrer || '',
       pagina:   window.location.href,
     });
@@ -1677,8 +1736,15 @@
     navigator.sendBeacon('/abandono-intake', new Blob([payload], { type: 'application/json' }));
   }
 
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') captureSession(); });
-  window.addEventListener('pagehide', captureSession);
+  document.addEventListener('visibilitychange', () => {
+    clearTimeout(temporizador);
+    if (document.visibilityState === 'hidden')
+      temporizador = setTimeout(() => captureSession('inactividad'), GRACIA_MS);
+  });
+  window.addEventListener('pagehide', () => {
+    clearTimeout(temporizador);
+    captureSession('salida');
+  });
 
   // ====== ABANDONO DE FORMULARIO (GA4) — añadido 11-ago-2026 ======
   // Hasta ahora el abandono solo se guardaba en la base (captureSession) y no
@@ -2166,7 +2232,7 @@ src="https://www.facebook.com/tr?id=1290749182534707&ev=PageView&noscript=1"/></
 <!-- End Facebook Pixel Code -->
 <!-- LinkedIn Insight Tag -->
 <script type="text/javascript">
-_linkedin_partner_id = "9091626";
+_linkedin_partner_id = "10698761";
 window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
 window._linkedin_data_partner_ids.push(_linkedin_partner_id);
 </script><script type="text/javascript">
@@ -2180,7 +2246,7 @@ b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
 s.parentNode.insertBefore(b, s);})(window.lintrk);
 </script>
 <noscript>
-<img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=9091626&fmt=gif" />
+<img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=10698761&fmt=gif" />
 </noscript>
 <!-- End LinkedIn Insight Tag -->
 <!-- Microsoft Clarity -->
