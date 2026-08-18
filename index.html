@@ -1694,8 +1694,15 @@
   function datosActuales() {
     const v = (id) => (document.getElementById(id)?.value || '').trim();
     return {
+      // `intencion` es el servicio que la persona vino a pedir, y es lo que
+      // nombra la oportunidad en el CRM. El envío completo sí lo mandaba;
+      // esta función, que es la del ABANDONO, no — así que de los abandonos
+      // (176 de los 298 registros de K2) no se sabía qué venían a buscar.
+      // Ahí vale más que en el envío completo: es lo único que separa al que
+      // hay que perseguir del ruido.
       nombre: v('nombre'), telefono: v('telefono'), ruc: v('ruc'), puesto: v('puesto'),
       email: v('email'), empresa: v('empresa'), sector: v('sector'), comentario: v('comentario'),
+      intencion: v('intencion'),
     };
   }
 
