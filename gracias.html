@@ -56,6 +56,12 @@ if (_eid) {
   try { _yaDisparado = sessionStorage.getItem('k2_lead_' + _eid) === '1'; } catch(e){}
   if (!_yaDisparado) {
     fbq('track','Lead',{currency:'PEN', value:1, content_category:'mineria', content_name: _variant},{eventID: _eid});
+    // Stub auto-inicializable: el snippet de LinkedIn (que define window.lintrk de
+    // verdad) vive mas abajo en el documento, asi que aca todavia no existe. Sin
+    // este stub, "typeof window.lintrk === 'function'" da false y la llamada se
+    // salta en silencio sin encolar nada — eso dejaba la conversion sin disparar.
+    window.lintrk = window.lintrk || function(a,b){(window.lintrk.q = window.lintrk.q || []).push([a,b]);};
+    window.lintrk('track', { conversion_id: 29999537 });
     try { sessionStorage.setItem('k2_lead_' + _eid, '1'); } catch(e){}
   }
 }
@@ -65,7 +71,7 @@ src="https://www.facebook.com/tr?id=1290749182534707&ev=Lead&noscript=1"/></nosc
 <!-- End Facebook Pixel Code -->
 <!-- LinkedIn Insight Tag -->
 <script type="text/javascript">
-_linkedin_partner_id = "9091626";
+_linkedin_partner_id = "10698761";
 window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
 window._linkedin_data_partner_ids.push(_linkedin_partner_id);
 </script><script type="text/javascript">
@@ -79,7 +85,7 @@ b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
 s.parentNode.insertBefore(b, s);})(window.lintrk);
 </script>
 <noscript>
-<img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=9091626&fmt=gif" />
+<img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=10698761&fmt=gif" />
 </noscript>
 <!-- End LinkedIn Insight Tag -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
