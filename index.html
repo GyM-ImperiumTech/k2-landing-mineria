@@ -1125,14 +1125,13 @@
     .form-card{padding:24px 20px;max-width:100%}
   }
 
-  /* B: Mobile — hero-sub truncated to 3 lines to reduce hero height before form */
+  /* B: Mobile — hero-sub muestra una version corta y completa (3 lineas) en vez de
+     cortar la frase larga a medias con line-clamp. Reemplaza el hack anterior:
+     antes esto truncaba el texto completo con "..." a mitad de oracion. */
+  .hero-sub-mobile{display:none}
   @media (max-width:768px){
-    .hero-sub{
-      display:-webkit-box;
-      -webkit-line-clamp:3;
-      -webkit-box-orient:vertical;
-      overflow:hidden;
-    }
+    .hero-sub-full{display:none}
+    .hero-sub-mobile{display:inline}
   }
 </style>
 
@@ -1160,14 +1159,14 @@
   <div class="orb o2"></div>
   <div class="orb o3"></div>
   <div class="hero-scan"></div>
-  <canvas id="particles" style="position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.7"></canvas>
+  <canvas id="particles" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.7"></canvas>
   <div class="container hero-grid">
     <div>
       <a href="#formulario" data-cta="hero_titulo" style="display:block;text-decoration:none;color:inherit;cursor:pointer" aria-label="Habla con un ejecutivo en 24h">
         <div class="eyebrow">Seguridad y resguardo para operaciones · Perú</div>
         <h1 class="hero-title" id="hero-title">Resguardamos tu <em>operación minera</em> donde otros no llegan.</h1>
       </a>
-      <p class="hero-sub" id="hero-sub">Vigilancia armada, traslado de valores, resguardo de personal clave y protección perimetral 24/7 en los entornos más exigentes del Perú. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, protocolos ISO 9001 / 45001 y respuesta inmediata ante crisis.</p>
+      <p class="hero-sub" id="hero-sub"><span class="hero-sub-mobile">Vigilancia armada y protección perimetral 24/7. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, ISO 9001/45001.</span><span class="hero-sub-full">Vigilancia armada, traslado de valores, resguardo de personal clave y protección perimetral 24/7 en los entornos más exigentes del Perú. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, protocolos ISO 9001 / 45001 y respuesta inmediata ante crisis.</span></p>
 
       <div class="hero-ctas">
         <a href="#formulario" class="btn btn-accent btn-lg" data-cta="hero">
