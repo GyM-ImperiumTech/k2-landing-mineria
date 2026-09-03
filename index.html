@@ -1449,14 +1449,22 @@
 
       <div class="field">
         <label class="field__label" for="intencion">¿Qué necesitas? <span class="req" aria-hidden="true">*</span><span class="sr-only">(obligatorio)</span></label>
+        <!-- Los `value` son el nombre EXACTO del servicio en el catálogo del CRM,
+             no slugs. `matchServiceFromText` (HermesV2 services.js:117) resuelve
+             por nombre normalizado exacto —minúsculas, sin tildes, espacios
+             colapsados— y NO toca los underscores, así que `control_accesos`
+             nunca iba a encontrar "Control de accesos". Con los slugs solo
+             resolvía `resguardo`: 6 de 7 opciones entraban al CRM como texto
+             crudo, sin serviceId, y el informe por servicio quedaba vacío.
+             El texto visible es libre; el value tiene que calzar con el catálogo. -->
         <select class="input" id="intencion" name="intencion" required>
           <option value="" disabled selected>Selecciona…</option>
-          <option value="vigilancia">Vigilancia en faena, planta o campamento</option>
-          <option value="resguardo">Resguardo de gerencia y traslados a unidad</option>
-          <option value="control_accesos">Control de accesos a unidad minera</option>
-          <option value="invasion">Recuperación de espacios invadidos</option>
-          <option value="consultoria">Estudio de riesgos de la operación</option>
-          <option value="monitoreo">Monitoreo, CCTV y central 24/7</option>
+          <option value="Vigilancia y seguridad en instalaciones">Vigilancia en faena, planta o campamento</option>
+          <option value="Resguardo personal / Escolta">Resguardo de gerencia y traslados a unidad</option>
+          <option value="Control de accesos">Control de accesos a unidad minera</option>
+          <option value="Recuperación de espacios invadidos">Recuperación de espacios invadidos</option>
+          <option value="Consultoría y diagnóstico de riesgos">Estudio de riesgos de la operación</option>
+          <option value="Monitoreo y centro de control">Monitoreo, CCTV y central 24/7</option>
           <option value="otro">Otro servicio de seguridad</option>
         </select>
         <div class="field__error">
@@ -2316,12 +2324,15 @@
       // no se lo volvemos a preguntar en el primer campo.
       var cta = a.getAttribute('data-cta') || '';
       if(cta.indexOf('servicio_') === 0){
+        // Los valores tienen que ser los mismos `value` del <select>, que son
+        // los nombres del catálogo del CRM. Si acá quedara un slug viejo,
+        // `sel.value = ...` no encontraría la opción y la dejaría en blanco.
         var mapa = {
-          servicio_vigilancia: 'vigilancia',
-          servicio_resguardo: 'resguardo',
-          servicio_especiales: 'invasion',
-          servicio_consultoria: 'consultoria',
-          servicio_monitoreo: 'monitoreo'
+          servicio_vigilancia: 'Vigilancia y seguridad en instalaciones',
+          servicio_resguardo: 'Resguardo personal / Escolta',
+          servicio_especiales: 'Recuperación de espacios invadidos',
+          servicio_consultoria: 'Consultoría y diagnóstico de riesgos',
+          servicio_monitoreo: 'Monitoreo y centro de control'
         };
         var sel = document.getElementById('intencion');
         if(sel && mapa[cta]){
