@@ -1210,8 +1210,13 @@
   .submit-fallback strong{display:block;color:#fff;margin-bottom:3px}
   .submit-fallback a{color:var(--k2-primary);font-weight:600}
 
-  /* El ancla vive junto al formulario: scroll-margin en vez del margin-top:-80px */
-  #formulario{display:block;scroll-margin-top:88px}
+  /* El ancla vive junto al formulario: scroll-margin en vez del margin-top:-80px.
+     `position:absolute` la saca del flujo: como es hermana del formulario dentro
+     de .hero-grid, en escritorio ocupaba una celda del grid de dos columnas y
+     empujaba el formulario a la fila 2 — el hero dejaba de ser split y el
+     formulario caía a ~974 px. Con la caja fuera del grid, el ancla sigue
+     existiendo para el scroll y no participa del layout. */
+  #formulario{position:absolute;width:0;height:0;overflow:hidden;scroll-margin-top:88px}
   #lead-form{scroll-margin-top:88px}
 
   /* Toast: no cabía a 320px (sin max-width, con left:50% + translateX) y es el
@@ -1264,6 +1269,81 @@
   @media (max-width:560px){
     .nav-inner{padding:12px 20px}          /* estaba en 32px mientras .container iba a 20px */
     .nav-right .btn{font-size:11px;padding:0 14px}
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     EL FORMULARIO, EN EL PRIMER VIEWPORT (móvil)
+     ═══════════════════════════════════════════════════════════════════════
+     El primer campo arrancaba a ~905 px con 671 px de área útil real
+     (812 − 73 del nav − 68 del sticky): el usuario recorría 2,5 pantallas
+     entre el anuncio y el botón de enviar, en tráfico frío de feed que no
+     pidió nada. El 86 % de las impresiones son móvil, así que ese recorrido
+     ES la landing para casi todo el mundo.
+
+     Se reordena con `order` en vez de tocar el DOM, así el escritorio —donde
+     el split hero/formulario funciona bien— queda intacto. El truco es
+     `display:contents` en la columna izquierda: sus hijos pasan a ser hijos
+     directos del contenedor flex y entran en el mismo reparto de `order`
+     que el formulario, que ya era hermano suyo.
+
+     Orden en móvil:  eyebrow · titular · subtítulo · FORMULARIO ·
+                      sellos · estadísticas
+  */
+  @media (max-width:1000px){
+    .hero-grid{display:flex;flex-direction:column;gap:0}
+    .hero-grid > div:first-of-type{display:contents}
+
+    .eyebrow    {order:1}
+    .hero-title {order:2}
+    .hero-sub   {order:3}
+    #formulario {order:4}
+    #lead-form  {order:5;margin-bottom:32px}
+    .trust-row  {order:6}
+    .hero-stats {order:7}
+
+    /* El CTA del hero se retira en móvil: es un ancla al formulario, y el
+       formulario ya está a la vista. Dejarlo costaba 52 px + margen justo
+       encima de lo que se quiere mostrar, y el sticky de abajo ya ofrece un
+       CTA permanente. En escritorio sigue igual. */
+    .hero-ctas{display:none}
+
+    /* Recortes para que el primer CAMPO entre, no solo el borde de la
+       tarjeta. Cada uno está medido, no elegido a ojo. */
+    .hero{padding-top:24px!important}
+    .eyebrow{font-size:11px;padding:7px 12px;margin-bottom:14px}
+    .hero-title{font-size:30px;line-height:1.1;margin-bottom:14px}
+    .hero-sub{margin-bottom:18px}
+    .form-card{padding:20px 18px}
+    .form-header{padding-bottom:14px;margin-bottom:14px}
+    .form-title{font-size:22px;line-height:1.15}
+
+    /* El subtítulo del formulario repite lo que ya dice el badge que está dos
+       líneas encima ("Sin costo · Respuesta en 24 h hábiles"). Tres líneas de
+       texto redundante justo delante del primer campo. En escritorio se queda,
+       ahí sobra el espacio. */
+    .form-sub{display:none}
+
+    /* Los sellos del ticket 12 quedaban DUPLICADOS en móvil: una vez dentro
+       del formulario y otra en la .trust-row, que ahora va debajo. Ese ticket
+       era de escritorio — "certificaciones visibles sin scroll (desktop)",
+       porque a 1366 px la columna del hero cae bajo el pliegue— y en móvil el
+       problema no existe: la .trust-row aparece nada más pasar el formulario.
+       Se ocultan los del formulario, no los de abajo. */
+    .form-trust{display:none}
+  }
+
+  /* Pantallas de 360 px o menos. A 320 el nav desbordaba de verdad —medido:
+     el contenido pedía más ancho que el contenedor— y como `overflow-x:hidden`
+     lo esconde en vez de mostrarlo, se recortaba en silencio. */
+  @media (max-width:360px){
+    .nav-inner{padding:10px 14px;gap:8px}
+    .logo-img{height:30px;width:auto}
+    .nav-right .btn{font-size:10px;padding:0 10px;letter-spacing:.02em}
+    .eyebrow{font-size:10px;padding:6px 10px;margin-bottom:12px}
+    .hero-title{font-size:27px}
+    /* En 568 px de alto no cabe titular + subtítulo + primer campo por mucho
+       que se recorte. Se prioriza que el formulario asome —arranca a ~500 px
+       en vez de ~905— y el resto queda a un gesto de scroll. */
   }
 
   /* Rendimiento en móvil: el canvas dibuja 38 nodos y hasta 703 comprobaciones
