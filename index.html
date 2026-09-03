@@ -1125,13 +1125,13 @@
     .form-card{padding:24px 20px;max-width:100%}
   }
 
-  /* B: Mobile — hero-sub truncated to 3 lines to reduce hero height before form */
+  /* B: Mobile — hero-sub muestra una version corta y completa (3 lineas) en vez de
+     cortar la frase larga a medias con line-clamp. Reemplaza el hack anterior:
+     antes esto truncaba el texto completo con "..." a mitad de oracion. */
+  .hero-sub-mobile{display:none}
   @media (max-width:768px){
-    /* Antes: -webkit-line-clamp:3, que a 320px recortaba 4 de 7 líneas y se
-       llevaba justamente las credenciales (SUCAMEC, ISO 9001/45001) — y al
-       ampliar el texto al 200% borraba más contenido en vez de reflowirlo.
-       Se acorta bajando el cuerpo, sin perder texto. */
-    .hero-sub{font-size:15px;line-height:1.6;margin-bottom:20px}
+    .hero-sub-full{display:none}
+    .hero-sub-mobile{display:inline}
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -1295,7 +1295,7 @@
   <div class="orb o2"></div>
   <div class="orb o3"></div>
   <div class="hero-scan"></div>
-  <canvas id="particles" style="position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.7"></canvas>
+  <canvas id="particles" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.7"></canvas>
   <div class="container hero-grid">
     <div>
       <!-- El titular ya no es un enlace: su aria-label ("Habla con un ejecutivo
@@ -1304,7 +1304,7 @@
            El CTA explícito está tres líneas más abajo. -->
       <div class="eyebrow">Seguridad y resguardo para operaciones · Perú</div>
       <h1 class="hero-title" id="hero-title">Resguardamos tu <em>operación minera</em> donde otros no llegan.</h1>
-      <p class="hero-sub" id="hero-sub">Vigilancia armada, traslado de valores, resguardo de personal clave y protección perimetral 24/7 en los entornos más exigentes del Perú. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, protocolos ISO 9001 / 45001 y respuesta inmediata ante crisis.</p>
+      <p class="hero-sub" id="hero-sub"><span class="hero-sub-mobile">Vigilancia armada y protección perimetral 24/7. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, ISO 9001/45001.</span><span class="hero-sub-full">Vigilancia armada, traslado de valores, resguardo de personal clave y protección perimetral 24/7 en los entornos más exigentes del Perú. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, protocolos ISO 9001 / 45001 y respuesta inmediata ante crisis.</span></p>
 
       <div class="hero-ctas">
         <a href="#formulario" class="btn btn-accent btn-lg" data-cta="hero">
