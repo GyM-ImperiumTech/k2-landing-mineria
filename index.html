@@ -444,9 +444,9 @@
   .input, .textarea{
     width:100%;height:44px;padding:0 14px;
     background:rgba(255,255,255,.03);
-    border:1px solid var(--k2-border-strong);
+    border:1px solid #6E7070;   /* 3,60:1 sobre la tarjeta — antes rgba(255,255,255,.16) = 1,63:1 */
     border-radius:4px;
-    font-family:var(--font-sans);font-weight:300;font-size:14px;
+    font-family:var(--font-sans);font-weight:300;font-size:16px;   /* 16px minimo: por debajo iOS hace zoom al enfocar */
     color:var(--white);
     transition:all 200ms ease;
     outline:none;
@@ -454,7 +454,7 @@
   .textarea{height:auto;padding:12px 14px;min-height:84px;resize:vertical;line-height:1.6}
   select.input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238fa5bf' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
   select.input option{background:#0d1f1f;color:#fff;}
-  .input::placeholder,.textarea::placeholder{color:var(--k2-text-dim)}
+  .input::placeholder,.textarea::placeholder{color:#909090}   /* 5,23:1 — antes #7A7A7A = 3,89:1 */
   .input:focus,.textarea:focus{
     border-color:var(--k2-primary);
     background:rgba(0,244,237,.03);
@@ -1138,6 +1138,142 @@
     .hero-sub-full{display:none}
     .hero-sub-mobile{display:inline}
   }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ARREGLOS DE LA AUDITORÍA CRO — 02-sep-2026
+     Van al final para que ganen por orden de cascada sin tocar las reglas
+     originales. Cada bloque dice qué problema medido resuelve.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* Texto sólo para lectores de pantalla (marcas de campo obligatorio) */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+  /* Marca de obligatorio y leyenda: antes el asterisco estaba en 2 campos de 7
+     y no había nada que explicara qué significaba. */
+  .field__label .req{color:var(--k2-primary);font-weight:600;margin-left:2px}
+  .form-legend{font-size:12px;color:#A5A5A5;margin:0 0 14px}
+
+  /* Ayuda de formato permanente. El placeholder llevaba las instrucciones
+     ("9XXXXXXXX", "20XXXXXXXXX") y desaparecía justo al empezar a escribir. */
+  .field__hint{font-size:12px;color:#A5A5A5;margin:6px 0 0;line-height:1.4}
+
+  /* Foco visible de verdad. Antes: .input{outline:none} y un box-shadow de
+     rgba(0,244,237,.12) = 1,30:1 — y en estado inválido .field.invalid .input
+     (0,3,0) le ganaba a .input:focus (0,2,0), así que al corregir un campo el
+     único indicador nuevo era un anillo de 1,18:1. */
+  .input:focus-visible,.textarea:focus-visible,
+  .field.invalid .input:focus-visible,.field.invalid .textarea:focus-visible{
+    outline:3px solid var(--k2-primary);
+    outline-offset:2px;
+    box-shadow:none;
+  }
+  .field.invalid .input:focus-visible,.field.invalid .textarea:focus-visible{outline-color:#FCA5A5}
+  .btn:focus-visible,.submit-btn:focus-visible,.cta-btn-big:focus-visible,
+  .sticky-cta a:focus-visible,.svc:focus-visible,.client-logo:focus-visible,
+  .nav-phone:focus-visible,.checkbox-label a:focus-visible,
+  input[type="checkbox"]:focus-visible{
+    outline:3px solid var(--k2-primary);
+    outline-offset:3px;
+  }
+
+  /* Respuesta al toque. Los botones hacían :active{transform:none}, y como en
+     táctil no hay :hover, TODO el trabajo de interacción del archivo era
+     invisible para el 100% del tráfico real (85,8% Android). */
+  .btn:active,.btn-primary:active,.btn-accent:active,
+  .submit-btn:active,.cta-btn-big:active,.sticky-cta a:active{
+    transform:scale(.97);
+    filter:brightness(.92);
+  }
+  .svc:active,.client-logo:active{transform:scale(.99)}
+
+  /* Área táctil del consentimiento: el cuadrito medía 16px. */
+  .checkbox-label input[type="checkbox"]{
+    flex-shrink:0;
+    width:24px;height:24px;
+    accent-color:var(--k2-primary);
+    cursor:pointer;
+  }
+  .checkbox-label{min-height:44px;padding:6px 0}
+  .consent-group.invalid .field__error{display:flex}
+  .consent-group.invalid .checkbox-label{color:#F87171;font-weight:400}
+  .consent-group.invalid input[type="checkbox"]{outline:2px solid #F87171;outline-offset:2px}
+
+  /* Salida real cuando el envío falla. Antes se redirigía a gracias.html igual
+     y se prometía una llamada que nadie iba a hacer. */
+  .submit-fallback{
+    margin:14px 0 0;padding:14px 16px;
+    background:rgba(248,113,113,.1);
+    border-left:3px solid #F87171;
+    border-radius:4px;
+    font-size:13.5px;line-height:1.5;color:#FCA5A5;
+  }
+  .submit-fallback strong{display:block;color:#fff;margin-bottom:3px}
+  .submit-fallback a{color:var(--k2-primary);font-weight:600}
+
+  /* El ancla vive junto al formulario: scroll-margin en vez del margin-top:-80px */
+  #formulario{display:block;scroll-margin-top:88px}
+  #lead-form{scroll-margin-top:88px}
+
+  /* Toast: no cabía a 320px (sin max-width, con left:50% + translateX) y es el
+     mensaje de error, así que recortarlo es doblemente grave. */
+  .toast{max-width:calc(100vw - 32px)}
+
+  /* Contraste de las etiquetas del hero, que son la prueba social y se leen al
+     sol: .trust-label estaba a 3,81:1 y .stat-label a 5,28:1 en 10px. */
+  .trust-label{color:#A5A5A5;font-size:11px}
+  .stat-label{color:rgba(255,255,255,.72);font-size:11px}
+  .field__label .opt{color:#949494}
+
+
+  /* Sticky con un solo CTA al formulario. NO se ofrece WhatsApp: K2 no tiene
+     capacidad de atención por ese canal, y un canal desatendido es peor que
+     ninguno. El CSS .sc-wa del archivo original queda muerto a propósito. */
+  .sticky-cta .sc-form{flex:1;min-height:48px}
+
+  /* Botones que crecen con el texto en vez de desbordar la caja */
+  .btn,.btn-lg,.submit-btn,.cta-btn-big,.sticky-cta a{height:auto;min-height:44px}
+  /* NOTA: la landing no ofrece teléfono ni WhatsApp a propósito. K2 no recibe
+     llamadas ni mensajes entrantes: su proceso es outbound, y el formulario
+     pide correo y teléfono para tener dos vías de contactar al lead. Las
+     reglas .nav-phone y .sc-wa del CSS original quedan muertas a propósito. */
+  .submit-btn{min-height:54px}
+  .cta-btn-big{min-height:60px}
+
+  /* Jerarquía del H2: todos eran cyan y el <em> también, así que el énfasis no
+     tenía contra qué destacar. Y .section-pre medía 18px como mínimo — más que
+     el cuerpo de texto — partiendo cada titular en dos tamaños y dos colores. */
+  h2{color:#FFFFFF}
+  h2 em{color:var(--k2-primary)}
+  .section-pre{font-size:11px;letter-spacing:.18em}
+
+  /* Movimiento reducido: sólo .reveal y el parallax lo respetaban. Seguían
+     corriendo nueve animaciones infinitas y un canvas a 60fps. */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.01ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:.01ms!important;
+    }
+    html{scroll-behavior:auto}
+    .orb,.hero-glow-line,.section-glow,.section-divider::before{animation:none}
+    #particles{display:none!important}
+  }
+
+  /* El nav a 320px no tenía sitio para su contenido (426px calculados en 256px
+     disponibles) y el padding lateral iba a 32px mientras .container iba a 20px. */
+  @media (max-width:560px){
+    .nav-inner{padding:12px 20px}          /* estaba en 32px mientras .container iba a 20px */
+    .nav-right .btn{font-size:11px;padding:0 14px}
+  }
+
+  /* Rendimiento en móvil: el canvas dibuja 38 nodos y hasta 703 comprobaciones
+     de distancia por frame mientras el usuario escribe. Con el INP de 1,8s ya
+     medido en el WebView de Facebook, es CPU que compite con el tecleo. */
+  @media (max-width:1000px){
+    #particles{display:none!important}
+    .orb{animation:none}
+    .form-card{backdrop-filter:none}   /* no difumina nada: la página es negra opaca */
+  }
 </style>
 
 </head>
@@ -1151,7 +1287,7 @@
       <img src="/img/logo.png" alt="K2 Seguridad y Resguardo" class="logo-img" width="180" height="44" fetchpriority="high">
     </a>
     <div class="nav-right">
-      <a href="#formulario" class="btn btn-accent" data-cta="nav">Habla con un ejecutivo en 24h</a>
+      <a href="#formulario" class="btn btn-accent" data-cta="nav">Diagnóstico sin costo</a>
     </div>
   </div>
 </nav>
@@ -1167,15 +1303,17 @@
   <canvas id="particles" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.7"></canvas>
   <div class="container hero-grid">
     <div>
-      <a href="#formulario" data-cta="hero_titulo" style="display:block;text-decoration:none;color:inherit;cursor:pointer" aria-label="Habla con un ejecutivo en 24h">
-        <div class="eyebrow">Seguridad y resguardo para operaciones · Perú</div>
-        <h1 class="hero-title" id="hero-title">Resguardamos tu <em>operación minera</em> donde otros no llegan.</h1>
-      </a>
+      <!-- El titular ya no es un enlace: su aria-label ("Habla con un ejecutivo
+           en 24h") no compartía ni una palabra con el texto visible, así que el
+           control por voz no podía activarlo y no se podía seleccionar el texto.
+           El CTA explícito está tres líneas más abajo. -->
+      <div class="eyebrow">Seguridad y resguardo para operaciones · Perú</div>
+      <h1 class="hero-title" id="hero-title">Resguardamos tu <em>operación minera</em> donde otros no llegan.</h1>
       <p class="hero-sub" id="hero-sub"><span class="hero-sub-mobile">Vigilancia armada y protección perimetral 24/7. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, ISO 9001/45001.</span><span class="hero-sub-full">Vigilancia armada, traslado de valores, resguardo de personal clave y protección perimetral 24/7 en los entornos más exigentes del Perú. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, protocolos ISO 9001 / 45001 y respuesta inmediata ante crisis.</span></p>
 
       <div class="hero-ctas">
         <a href="#formulario" class="btn btn-accent btn-lg" data-cta="hero">
-          Habla con un ejecutivo en 24h
+          Diagnóstico sin costo en tu faena
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </a>
       </div>
@@ -1196,27 +1334,31 @@
           <div class="stat-label">Años de experiencia</div>
         </div>
         <div>
-          <div class="stat-num">07</div>
-          <div class="stat-label">Certificaciones ISO</div>
+          <div class="stat-num">08</div>
+          <div class="stat-label">Certificaciones y acreditaciones</div>
         </div>
         <div>
           <div class="stat-num">24<span class="u">/</span>7</div>
           <div class="stat-label">Operaciones activas</div>
         </div>
         <div>
-          <div class="stat-num"><span class="u">+</span>20</div>
+          <div class="stat-num">19</div>
           <div class="stat-label">Clientes corporativos</div>
         </div>
       </div>
     </div>
 
     <!-- FORM -->
-    <form class="form-card" id="lead-form" novalidate>
+    <span id="formulario" aria-hidden="true"></span>
+    <form class="form-card" id="lead-form" novalidate aria-labelledby="form-title">
       <div class="form-progress" id="form-progress"></div>
       <div class="form-header">
-        <div class="form-badge">Respuesta en 24h</div>
-        <div class="form-title">Contáctanos</div>
-        <div class="form-sub">Un ejecutivo senior de operaciones mineras te contactará con un plan ajustado a tu faena.</div>
+        <div class="form-badge">Sin costo · Respuesta en 24 h hábiles</div>
+        <h2 class="form-title" id="form-title">Solicita tu diagnóstico sin costo</h2>
+        <p class="form-legend">Los campos con <span class="req" aria-hidden="true">*</span> son obligatorios.</p>
+        <div class="form-sub">Un ejecutivo senior de operaciones mineras te llama en 24 h hábiles con un plan ajustado a tu faena.</div>
+        <!-- Sellos del PR #5 (ticket 12): en 1366px la columna del hero queda
+             por debajo del pliegue, así que aquí aparecen junto al formulario. -->
         <div class="form-trust">
           <span class="trust-badge">ISO 9001</span>
           <span class="trust-badge">ISO 45001</span>
@@ -1226,14 +1368,15 @@
       </div>
 
       <div class="field">
-        <label class="field__label" for="intencion">¿Qué necesitas?</label>
+        <label class="field__label" for="intencion">¿Qué necesitas? <span class="req" aria-hidden="true">*</span><span class="sr-only">(obligatorio)</span></label>
         <select class="input" id="intencion" name="intencion" required>
-          <option value="">Selecciona…</option>
-          <option value="vigilancia">Vigilancia y seguridad en instalaciones</option>
-          <option value="resguardo">Resguardo personal / Escolta</option>
-          <option value="control_accesos">Control de accesos</option>
-          <option value="consultoria">Consultoría y diagnóstico de riesgos</option>
-          <option value="monitoreo">Monitoreo y centro de control</option>
+          <option value="" disabled selected>Selecciona…</option>
+          <option value="vigilancia">Vigilancia en faena, planta o campamento</option>
+          <option value="resguardo">Resguardo de gerencia y traslados a unidad</option>
+          <option value="control_accesos">Control de accesos a unidad minera</option>
+          <option value="invasion">Recuperación de espacios invadidos</option>
+          <option value="consultoria">Estudio de riesgos de la operación</option>
+          <option value="monitoreo">Monitoreo, CCTV y central 24/7</option>
           <option value="otro">Otro servicio de seguridad</option>
         </select>
         <div class="field__error">
@@ -1243,7 +1386,7 @@
       </div>
 
       <div class="field">
-        <label class="field__label" for="nombre">Nombre y apellido</label>
+        <label class="field__label" for="nombre">Nombre y apellido <span class="req" aria-hidden="true">*</span><span class="sr-only">(obligatorio)</span></label>
         <input class="input" type="text" id="nombre" name="nombre" required autocomplete="name" placeholder="Ej. Juan Pérez">
         <div class="field__error">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1253,19 +1396,21 @@
 
       <div class="row-2">
         <div class="field">
-          <label class="field__label" for="telefono">Teléfono</label>
-          <input class="input" type="tel" id="telefono" name="telefono" required autocomplete="tel" placeholder="9XXXXXXXX" maxlength="9" inputmode="numeric">
-          <div class="field__error">
+          <label class="field__label" for="telefono">Teléfono <span class="req" aria-hidden="true">*</span><span class="sr-only">(obligatorio)</span></label>
+          <input class="input" type="tel" id="telefono" name="telefono" required autocomplete="tel" placeholder="9XXXXXXXX" maxlength="9" inputmode="numeric" aria-describedby="tel-hint tel-error">
+          <p class="field__hint" id="tel-hint">9 dígitos, sin +51.</p>
+          <div class="field__error" id="tel-error" role="alert">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             Debe tener 9 dígitos.
           </div>
         </div>
         <div class="field">
-          <label class="field__label" for="ruc">RUC</label>
-          <input class="input" type="text" id="ruc" name="ruc" required placeholder="20XXXXXXXXX" maxlength="11" inputmode="numeric" title="Ingresa un RUC válido de 11 dígitos (empieza en 20 o 10)">
-          <div class="field__error">
+          <label class="field__label" for="ruc">RUC <span class="opt">(opcional — agiliza la propuesta)</span></label>
+          <input class="input" type="text" id="ruc" name="ruc" placeholder="20XXXXXXXXX" maxlength="11" inputmode="numeric" autocomplete="off" aria-describedby="ruc-hint ruc-error">
+          <p class="field__hint" id="ruc-hint">11 dígitos, sin guiones.</p>
+          <div class="field__error" id="ruc-error" role="alert">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Ingresa un RUC válido de 11 dígitos (empieza en 20 o 10).
+            Si lo completas, debe tener 11 dígitos (empieza en 10, 15, 16, 17 o 20).
           </div>
         </div>
       </div>
@@ -1273,7 +1418,7 @@
       <div class="row-2">
         <div class="field">
           <label class="field__label" for="puesto">Puesto <span class="opt">(opcional)</span></label>
-          <select class="input" id="puesto" name="puesto">
+          <select class="input" id="puesto" name="puesto" autocomplete="organization-title">
             <option value="">Selecciona tu cargo…</option>
             <option value="Gerente General">Gerente General</option>
             <option value="Gerente de Operaciones">Gerente de Operaciones</option>
@@ -1284,13 +1429,9 @@
             <option value="CEO / Propietario">CEO / Propietario</option>
             <option value="Otro">Otro</option>
           </select>
-          <div class="field__error">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Ingresa tu puesto.
-          </div>
         </div>
         <div class="field">
-          <label class="field__label" for="email">Email*</label>
+          <label class="field__label" for="email">Email <span class="req" aria-hidden="true">*</span><span class="sr-only">(obligatorio)</span></label>
           <input class="input" type="email" id="email" name="email" autocomplete="email" required placeholder="tu@empresa.com">
           <div class="field__error">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1314,9 +1455,9 @@
           </select>
         </div>
         <div class="field">
-          <label class="field__label" for="empresa">Empresa*</label>
-          <input class="input" type="text" id="empresa" name="empresa" required placeholder="Nombre de tu empresa">
-          <div class="field__error">
+          <label class="field__label" for="empresa">Empresa <span class="req" aria-hidden="true">*</span><span class="sr-only">(obligatorio)</span></label>
+          <input class="input" type="text" id="empresa" name="empresa" required autocomplete="organization" placeholder="Nombre de tu empresa" aria-describedby="empresa-error">
+          <div class="field__error" id="empresa-error" role="alert">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             Ingresa el nombre de tu empresa.
           </div>
@@ -1328,19 +1469,28 @@
         <textarea class="textarea" id="comentario" name="comentario" rows="3" placeholder="Cuéntanos brevemente qué necesitas proteger..."></textarea>
       </div>
 
+      <input type="hidden" name="variant" value="A">
       <div class="form-group consent-group">
-        <label class="checkbox-label">
-          <input type="hidden" name="variant" value="A">
-          <input type="checkbox" id="consent" name="consent" required>
-          Autorizo a K2 Seguridad y Resguardo a tratar mis datos personales conforme a la <a href="https://k2.com.pe/politicas-de-privacidad/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">política de privacidad de datos personales</a>. Puedo revocar esta autorización en cualquier momento.
+        <label class="checkbox-label" for="consent">
+          <input type="checkbox" id="consent" name="consent" required aria-describedby="consent-error">
+          Autorizo a K2 Seguridad y Resguardo a tratar mis datos personales conforme a la <a href="https://k2.com.pe/politicas-de-privacidad/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">política de privacidad de datos personales</a><span class="sr-only"> (se abre en una pestaña nueva)</span>. Puedo revocar esta autorización en cualquier momento.
         </label>
+        <div class="field__error" id="consent-error" role="alert">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Necesitamos tu autorización para poder contactarte.
+        </div>
       </div>
 
       <button type="submit" class="submit-btn" id="submit-btn">
         <span class="spinner"></span>
-        <span class="btn-label">Solicitar diagnóstico</span>
+        <span class="btn-label">Solicitar mi diagnóstico sin costo</span>
         <span class="arrow">→</span>
       </button>
+      <div class="submit-fallback" id="submit-fallback" role="alert" hidden>
+        <strong>No pudimos registrar tu solicitud.</strong>
+        Vuelve a pulsar el botón para reintentar. Tus datos siguen escritos, no
+        hace falta llenar el formulario otra vez.
+      </div>
       <div class="privacy">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <span>Tus datos están seguros. Los usaremos únicamente para contactarte. No compartimos información con terceros.</span>
@@ -1371,7 +1521,7 @@
         <div class="svc-body">
           <div class="svc-num">01 / VIGILANCIA</div>
           <h3>Seguridad y vigilancia</h3>
-          <p class="svc-desc">Personal armado y no armado para instalaciones industriales, corporativas y residenciales.</p>
+          <p class="svc-desc">Personal acreditado por SUCAMEC para faenas, campamentos, plantas concentradoras y accesos a unidad minera.</p>
         </div>
       </a>
       <a href="#formulario" class="svc" data-cta="servicio_resguardo">
@@ -1381,7 +1531,7 @@
         <div class="svc-body">
           <div class="svc-num">02 / RESGUARDO</div>
           <h3>Seguridad privada y resguardo personal</h3>
-          <p class="svc-desc">Protección ejecutiva y acompañamiento de personas clave en entornos de alto riesgo.</p>
+          <p class="svc-desc">Protección de gerencia y comitivas en traslados a unidad, zonas de conflicto social y rutas de altura.</p>
         </div>
       </a>
       <a href="#formulario" class="svc" data-cta="servicio_especiales">
@@ -1391,7 +1541,7 @@
         <div class="svc-body">
           <div class="svc-num">03 / ESPECIALES</div>
           <h3>Servicios de seguridad especiales</h3>
-          <p class="svc-desc">Operativos a medida: traslado de valores, resguardo de eventos y contingencias críticas.</p>
+          <p class="svc-desc">Recuperación de espacios invadidos, custodia de concentrado y respuesta ante bloqueos y paralizaciones.</p>
         </div>
       </a>
       <a href="#formulario" class="svc" data-cta="servicio_consultoria">
@@ -1401,7 +1551,7 @@
         <div class="svc-body">
           <div class="svc-num">04 / CONSULTORÍA</div>
           <h3>Consultoría y prevención de riesgos</h3>
-          <p class="svc-desc">Diagnóstico de vulnerabilidades, diseño de protocolos y capacitación especializada.</p>
+          <p class="svc-desc">Estudio de riesgos de la unidad, protocolos alineados a ISO 45001 y homologación como proveedor minero.</p>
         </div>
       </a>
       <a href="#formulario" class="svc" data-cta="servicio_monitoreo">
@@ -1411,7 +1561,7 @@
         <div class="svc-body">
           <div class="svc-num">05 / MONITOREO</div>
           <h3>Monitoreo y centro de control</h3>
-          <p class="svc-desc">CCTV, control de accesos, drones y central de operaciones 24/7 con respuesta inmediata.</p>
+          <p class="svc-desc">CCTV y control de accesos en faena, drones para perímetro y relaveras, y central 24/7 con reporte a la superintendencia.</p>
         </div>
       </a>
     </div>
@@ -1502,7 +1652,7 @@
         <div class="cert-desc">Dirección General de Aeronáutica Civil</div>
       </div>
       <div class="cert">
-        <div class="cert-logo"><img src="sucamec-logo.jpg" alt="SUCAMEC" loading="lazy"></div>
+        <div class="cert-logo"><img src="/img/certificaciones/sucamec-logo.jpg" alt="SUCAMEC" loading="lazy"></div>
         <div class="cert-name">SUCAMEC</div>
         <div class="cert-desc">Autorización para manejo de armas</div>
       </div>
@@ -1521,7 +1671,7 @@
 
     <div class="clients-groups">
       <div class="clients-group">
-        <h4>Minería</h4>
+        <h3>Minería</h3>
         <div class="clients-list">
           <div class="client-logo"><img src="/img/clientes/mmg-las-bambas.png" alt="MMG Las Bambas" loading="lazy"></div>
           <div class="client-logo"><img src="/img/clientes/consorcio-minero-horizonte.png" alt="Consorcio Minero Horizonte" loading="lazy"></div>
@@ -1532,7 +1682,7 @@
         </div>
       </div>
       <div class="clients-group">
-        <h4>Logística</h4>
+        <h3>Logística</h3>
         <div class="clients-list">
           <div class="client-logo"><img src="/img/clientes/prodis-logistica.png" alt="Prodis Logística Farmacéutica" loading="lazy"></div>
           <div class="client-logo"><img src="/img/clientes/rodo-logistics.png" alt="Rodo Logistics" loading="lazy"></div>
@@ -1540,7 +1690,7 @@
         </div>
       </div>
       <div class="clients-group">
-        <h4>Industrias</h4>
+        <h3>Industrias</h3>
         <div class="clients-list">
           <div class="client-logo"><img src="/img/clientes/ach-almacenes.png" alt="ACH Almacenes Central Huachipa" loading="lazy"></div>
           <div class="client-logo"><img src="/img/clientes/mission.png" alt="Mission" loading="lazy"></div>
@@ -1550,7 +1700,7 @@
         </div>
       </div>
       <div class="clients-group">
-        <h4>Salud y otros</h4>
+        <h3>Salud y otros</h3>
         <div class="clients-list">
           <div class="client-logo"><img src="/img/clientes/clinica-anglo-americana.png" alt="Clínica Anglo Americana" loading="lazy"></div>
           <div class="client-logo"><img src="/img/clientes/iqfarma.png" alt="Iqfarma" loading="lazy"></div>
@@ -1568,10 +1718,10 @@
   <div class="container cta-final-inner">
     <div>
       <h2>¿Listo para proteger tu operación?</h2>
-      <p>Agenda una llamada con uno de nuestros ejecutivos. Analizamos tus riesgos y te respondemos en menos de 24 horas.</p>
+      <p>Un ejecutivo de operaciones mineras analiza los riesgos de tu unidad y te llama en 24 h hábiles. Sin costo y sin compromiso.</p>
     </div>
     <a href="#formulario" class="cta-btn-big" data-cta="cta_final">
-      Habla con un ejecutivo en 24h ahora
+      Solicitar mi diagnóstico sin costo
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </a>
   </div>
@@ -1579,18 +1729,20 @@
 
 <!-- Footer removido -->
 
-<span id="formulario" style="position:absolute;margin-top:-80px;"></span>
+<!-- El ancla #formulario vive ahora junto al formulario (arriba). Antes estaba
+     aquí, al final del documento: si el JS que intercepta los CTA no había
+     cargado todavía, cada CTA saltaba al pie de la página. -->
 
 <!-- STICKY MOBILE CTA -->
 <div class="sticky-cta" id="sticky-cta">
   <a href="#formulario" class="sc-form" data-cta="sticky_movil">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    Contáctanos
+    Sin costo
   </a>
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast" role="status" aria-live="polite">
+<div class="toast" id="toast" role="alert" aria-live="assertive">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
   <span id="toast-msg">Revisa los campos marcados</span>
 </div>
@@ -1814,11 +1966,19 @@
     let ok = true; let firstBad = null;
     const consentEl = document.getElementById('consent');
     if(consentEl && !consentEl.checked){
-      consentEl.closest('.consent-group').classList.add('invalid');
-      if(!firstBad) firstBad = consentEl.closest('.consent-group');
+      // Sólo se marca en rojo al intentar enviar (showAll) o si la persona ya
+      // tocó la casilla. Antes se marcaba en cuanto se escribía en cualquier
+      // campo: un error de algo que todavía no había llegado a tocar.
+      const grupo = consentEl.closest('.consent-group');
+      if(showAll || grupo.dataset.touched === '1'){
+        grupo.classList.add('invalid');
+        consentEl.setAttribute('aria-invalid','true');
+      }
+      if(!firstBad) firstBad = grupo;
       ok = false;
     } else if(consentEl){
       consentEl.closest('.consent-group').classList.remove('invalid');
+      consentEl.setAttribute('aria-invalid','false');
     }
     const fields = [
       {id:'intencion', test: v => v.trim() !== ''},
@@ -1826,7 +1986,7 @@
       {id:'telefono', test: v => /^\d{9}$/.test(v.replace(/^\+?51/, '').replace(/[\s\-\(\)\.]/g, ''))},
       // RUC opción B: solo valida formato si el usuario escribió 11 dígitos;
       // vacío u otros formatos pasan (no bloquea prospectos extranjeros).
-      {id:'ruc', test: v => v.trim()==='' || /^(10|15|17|20)\d{9}$/.test(v.trim())},
+      {id:'ruc', test: v => v.trim()==='' || /^(10|15|16|17|20)\d{9}$/.test(v.trim())},
       {id:'puesto', test: v => true},
       {id:'email', test: v => { var tel = (document.getElementById('telefono')?.value||'').replace(/^\+?51/,'').replace(/\D/g,''); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }},
       {id:'empresa', test: v => v.trim().length >= 2},
@@ -1840,6 +2000,7 @@
       if(touched){
         wrap.classList.toggle('invalid', !pass);
         wrap.classList.toggle('valid', pass && val.trim().length > 0);
+        el.setAttribute('aria-invalid', pass ? 'false' : 'true');
       } else if(pass && val.trim().length > 0){
         wrap.classList.add('valid');
         wrap.classList.remove('invalid');
@@ -1851,12 +2012,17 @@
   }
 
   function updateProgress(){
-    const ids = ['intencion','nombre','telefono','empresa'];
-    const done = ids.filter(id => {
+    // Los 5 campos que realmente bloquean el envío, más el consentimiento.
+    // Antes contaba 4 de 7: la barra llegaba a 100% con el email y la
+    // autorización vacíos, y el submit fallaba justo después.
+    const ids = ['intencion','nombre','telefono','email','empresa'];
+    let done = ids.filter(id => {
       const wrap = document.getElementById(id).closest('.field');
       return wrap.classList.contains('valid');
     }).length;
-    const pct = Math.round((done/ids.length)*100);
+    const consentOk = !!document.getElementById('consent')?.checked;
+    if(consentOk) done++;
+    const pct = Math.round((done/(ids.length+1))*100);
     const bar = document.getElementById('form-progress');
     if(bar) bar.style.width = pct + '%';
   }
@@ -1872,6 +2038,10 @@
     telEl.addEventListener('input', normalizeTel);
     telEl.addEventListener('blur',  normalizeTel);
   })();
+  document.getElementById('consent')?.addEventListener('change', function(){
+    this.closest('.consent-group').dataset.touched = '1';
+    validate(false);
+  });
   ['intencion','nombre','telefono','ruc','puesto','email','empresa'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('blur', () => {
@@ -1911,7 +2081,7 @@
     const {ok, firstBad} = validate(true);
     if(typeof gtag === 'function') gtag('event','form_submit_attempt',{form_id:'lead-form', valid: ok});
     if(!ok){
-      showToast('Revisa los campos marcados en rojo');
+      showToast('Faltan datos: revisa los campos indicados abajo');
       if(typeof gtag === 'function'){
         document.querySelectorAll('#lead-form .field.invalid').forEach(function(w){
           var inp = w.querySelector('input[id],select[id],textarea[id]');
@@ -1919,7 +2089,7 @@
         });
       }
       if(firstBad){
-        const input = firstBad.querySelector('.input, .textarea');
+        const input = firstBad.querySelector('.input, .textarea, input[type="checkbox"]');
         const rect = firstBad.getBoundingClientRect();
         window.scrollTo({top: window.scrollY + rect.top - 100, behavior: 'smooth'});
         setTimeout(() => input && input.focus(), 400);
@@ -1951,23 +2121,49 @@
 
     formSubmitted = true;
     let leadId = null;
+    let apiFallo = false;
 
     // 1. Send to K2 LeadFlow API (primary)
+    // Con timeout: sin AbortController, si /crm-intake se colgaba el boton
+    // quedaba deshabilitado con el spinner girando indefinidamente y, como
+    // formSubmitted ya era true, el beacon de abandono tampoco disparaba.
+    // El lead se perdia sin quedar registrado en ninguna parte.
     try {
+      const ctrl = new AbortController();
+      const tOut = setTimeout(() => ctrl.abort(), 8000);
       const apiRes = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload),
+        signal: ctrl.signal,
       });
+      clearTimeout(tOut);
       if(apiRes.ok){
         const data = await apiRes.json();
         if(data && data.leadId) leadId = data.leadId;
       } else {
+        apiFallo = true;
         console.warn('[K2] API respondió con error:', apiRes.status);
       }
     } catch(apiErr){
+      apiFallo = true;
       console.error('[K2] Error al enviar al API:', apiErr);
-      // Continue — we still redirect to gracias.html even if API fails
+    }
+
+    // Si el CRM no recibió el lead, no prometemos una llamada que nadie va a
+    // hacer: devolvemos el control y ofrecemos un canal que sí funciona.
+    // Antes se redirigía a gracias.html igual, con crm=0 en la URL y sin que
+    // gracias.html leyera ese parámetro.
+    if(apiFallo){
+      formSubmitted = false;
+      btn.disabled = false;
+      btn.classList.remove('sending');
+      btn.querySelector('.btn-label').textContent = 'Reintentar envío';
+      if(typeof gtag === 'function') gtag('event','form_submit_failed',{form_id:'lead-form'});
+      const salida = document.getElementById('submit-fallback');
+      if(salida) salida.hidden = false;
+      showToast('No pudimos registrar tu solicitud. Vuelve a intentarlo.');
+      return;
     }
 
     // 2. Also send to Google Sheets if configured (backup)
@@ -1997,6 +2193,24 @@
     // generamos uno en cliente para no perder el Lead de Meta (antes se perdía).
     // crm=0 permite medir en GA4/Meta cuántos envíos no llegaron al CRM.
     const eventId = leadId || ('k2-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10));
+
+    // Emparejamiento avanzado de Meta (portado de agro). El evento Lead de esta
+    // landing llega con calidad de coincidencia 6,6/10: teléfono en el 27,3% de
+    // los casos y Click ID en el 18,2%. Sin esas claves Meta no puede atribuir
+    // la conversión al clic que la produjo, que es exactamente lo que necesita
+    // para aprender. Se siembran acá y gracias.html las pasa al fbq('init').
+    // Solo con consentimiento explícito, y gracias.html las borra al usarlas
+    // (Ley 29733). El pixel las hashea antes de enviarlas.
+    try {
+      var _cons = document.getElementById('consent');
+      if(_cons && _cons.checked && eventId){
+        var _tel = (document.getElementById('telefono').value || '').replace(/\D/g,'');
+        sessionStorage.setItem('k2_am_' + eventId, JSON.stringify({
+          em: (document.getElementById('email').value || '').trim().toLowerCase(),
+          ph: _tel ? ('51' + _tel.slice(-9)) : ''
+        }));
+      }
+    } catch(e){}
     // `via` viaja también a gracias.html: ahí se emite el Lead de Meta y se mide la
     // vista de la página de conversión, así que sin esto el origen se perdería justo
     // en el evento que importa.
@@ -2018,11 +2232,29 @@
   document.querySelectorAll('a[href="#formulario"]').forEach(a => {
     a.addEventListener('click', (e) => {
       e.preventDefault();
+      // Si vino desde una tarjeta de servicio, ya nos dijo qué quiere:
+      // no se lo volvemos a preguntar en el primer campo.
+      var cta = a.getAttribute('data-cta') || '';
+      if(cta.indexOf('servicio_') === 0){
+        var mapa = {
+          servicio_vigilancia: 'vigilancia',
+          servicio_resguardo: 'resguardo',
+          servicio_especiales: 'invasion',
+          servicio_consultoria: 'consultoria',
+          servicio_monitoreo: 'monitoreo'
+        };
+        var sel = document.getElementById('intencion');
+        if(sel && mapa[cta]){
+          sel.value = mapa[cta];
+          sel.closest('.field').dataset.touched = '1';
+          validate(false);
+        }
+      }
       const target = document.getElementById('lead-form');
       const rect = target.getBoundingClientRect();
       const y = window.scrollY + rect.top - 80;
       window.scrollTo({top: y, behavior: 'smooth'});
-      setTimeout(() => document.getElementById('nombre').focus(), 600);
+      setTimeout(() => document.getElementById('intencion').focus(), 600);
     });
   });
 
@@ -2102,6 +2334,14 @@
   // ---------- PARTÍCULAS HERO (puntos tácticos conectados) ----------
   (function(){
     const canvas = document.getElementById('particles');
+    // El parallax (más arriba) sí consultaba prefers-reduced-motion; este no.
+    // Y en móvil compite con el tecleo: 38 nodos y hasta 703 comprobaciones de
+    // distancia por frame a 60fps, con un INP de 1,8s ya medido en el WebView.
+    if(canvas){
+      var noMov = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var esMovil = window.matchMedia('(max-width:1000px)').matches;
+      if(noMov || esMovil){ canvas.style.display = 'none'; return; }
+    }
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
     let w, h, dots = [], raf;
@@ -2171,7 +2411,11 @@
     function checkScrollDepth(){
       var docH = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       var pct  = Math.round(window.scrollY / docH * 100);
-      [25,50,75,90].forEach(function(m){
+      // El 10% se agrega por la altura de la página (~15.100px en móvil): el
+      // 25% cae en ~3.780px, y el formulario termina antes de los 2.200. Sin
+      // este umbral, alguien puede leer el formulario completo sin disparar un
+      // solo evento de scroll. Portado de agro, mismo motivo y misma altura.
+      [10,25,50,75,90,100].forEach(function(m){
         if(pct >= m && !depthFired[m]){
           depthFired[m] = true;
           gtag('event', 'scroll', { percent_scrolled: m });
@@ -2186,7 +2430,17 @@
       var el = document.getElementById(fid);
       if(!el) return;
       el.addEventListener('focus', function(){
-        if(!formStarted){ formStarted = true; gtag('event','form_start',{form_id:'lead-form'}); }
+        if(!formStarted){
+          formStarted = true;
+          gtag('event','form_start',{form_id:'lead-form'});
+          // Señal intermedia para Meta. El Lead (en gracias.html) es demasiado
+          // raro para que el algoritmo aprenda: 89 conversiones al mes entre 10
+          // conjuntos. Contact se dispara mucho más y da con qué optimizar.
+          // Portado de agro.k2.com.pe, que ya lo tenía y minería no.
+          if(typeof fbq === 'function'){
+            fbq('track','Contact',{content_category:'mineria', content_name:'inicio_formulario'});
+          }
+        }
       });
       el.addEventListener('blur', function(){
         var wrap = el.closest('.field');
@@ -2215,13 +2469,101 @@
       var secIO = new IntersectionObserver(function(entries){
         entries.forEach(function(en){
           if(en.isIntersecting){
-            gtag('event','section_view',{section_id: en.target.id || en.target.className.split(' ')[0]});
+            var _sid = en.target.id || en.target.className.split(' ')[0];
+            window.__k2UltimaSeccion = _sid;
+            gtag('event','section_view',{section_id: _sid});
             secIO.unobserve(en.target);
           }
         });
       },{threshold:0.3});
-      document.querySelectorAll('section[id]').forEach(function(s){ secIO.observe(s); });
+      // Se observa también el formulario: sin esto no se puede distinguir
+      // "no llegaron a verlo" de "lo vieron y no lo llenaron", que son dos
+      // problemas distintos con arreglos opuestos. Portado de agro.
+      document.querySelectorAll('section[id],#lead-form').forEach(function(s){ secIO.observe(s); });
     }
+
+    // --- Tiempo activo (portado de reporte-norte.k2.com.pe) ---
+    // Minería no medía tiempo en página de ninguna forma. Este contador solo
+    // avanza con la pestaña VISIBLE y CON FOCO: mide atención real, no tiempo
+    // de pestaña abierta y olvidada. Es más estricto que el del observatorio,
+    // que solo comprueba visibilidad.
+    (function(){
+      var acumuladoMs = 0;
+      var activoDesde = (document.visibilityState === 'visible' && document.hasFocus()) ? Date.now() : null;
+      var emitido = {};
+      function sincronizar(){
+        if(activoDesde != null){ acumuladoMs += Date.now() - activoDesde; activoDesde = Date.now(); }
+      }
+      function segundosActivos(){ sincronizar(); return Math.round(acumuladoMs / 1000); }
+      function pausar(){ sincronizar(); activoDesde = null; }
+      function reanudar(){ if(activoDesde == null) activoDesde = Date.now(); }
+      document.addEventListener('visibilitychange', function(){
+        if(document.visibilityState === 'visible' && document.hasFocus()) reanudar(); else pausar();
+      });
+      window.addEventListener('focus', reanudar);
+      window.addEventListener('blur', pausar);
+      var reloj = setInterval(function(){
+        var s = segundosActivos();
+        [15,30,60,120].forEach(function(u){
+          if(s >= u && !emitido[u]){
+            emitido[u] = true;
+            gtag('event','time_active',{ segundos: u });
+          }
+        });
+        if(emitido[120]) clearInterval(reloj);
+      }, 1000);
+      // Se expone para que el evento de salida pueda leer el acumulado.
+      window.__k2SegundosActivos = segundosActivos;
+    })();
+
+    // --- Evento de salida (portado de reporte-norte) ---
+    // Una sola foto del engagement al irse: hasta dónde leyó, qué sección fue
+    // la última que vio y cuánto tiempo estuvo de verdad. Antes esa información
+    // quedaba repartida en eventos sueltos que no siempre llegaban.
+    (function(){
+      var reportado = false;
+      function alSalir(){
+        if(reportado) return;
+        reportado = true;
+        var docH = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        gtag('event','page_exit',{
+          scroll_max: Math.min(100, Math.round(window.scrollY / docH * 100)),
+          seccion_max: window.__k2UltimaSeccion || '',
+          segundos: (typeof window.__k2SegundosActivos === 'function') ? window.__k2SegundosActivos() : 0,
+          transport_type: 'beacon'
+        });
+      }
+      document.addEventListener('visibilitychange', function(){
+        if(document.visibilityState === 'hidden') alSalir();
+      });
+      window.addEventListener('pagehide', alSalir);
+    })();
+
+    // --- layout_snapshot (portado de agro, 27-ago-2026) ---
+    // Mide dónde cae el formulario en el dispositivo real en vez de suponerlo.
+    // En la auditoría esto se calculó a mano sobre el CSS (formulario a ~905px
+    // con 671px útiles de viewport); así se mide en cada visita y se puede
+    // cruzar contra la conversión.
+    (function(){
+      try {
+        var f = document.getElementById('lead-form');
+        if(!f) return;
+        var vh = window.innerHeight || 0, vw = window.innerWidth || 0;
+        var b = f.getBoundingClientRect();
+        var topForm = Math.round(b.top + (window.scrollY || 0));
+        var altoPag = Math.round(document.documentElement.scrollHeight || 0);
+        gtag('event','layout_snapshot',{
+          vw: vw,
+          vh: vh,
+          pagina_px: altoPag,
+          pagina_pantallas: vh ? Math.round(altoPag / vh * 10) / 10 : 0,
+          form_top_px: topForm,
+          form_sobre_el_pliegue: topForm < vh ? 'si' : 'no',
+          form_pantallas: vh ? Math.round(topForm / vh * 100) / 100 : 0,
+          orientacion: vw > vh ? 'horizontal' : 'vertical'
+        });
+      } catch(e){}
+    })();
 
     // --- Outbound link clicks ---
     document.querySelectorAll('a[href^="http"]').forEach(function(a){

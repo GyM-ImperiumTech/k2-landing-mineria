@@ -43,7 +43,20 @@ n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
 n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init','1290749182534707');
+// Emparejamiento avanzado (portado de agro): si el formulario sembró correo
+  // y teléfono con consentimiento, se los pasa al pixel para que el Lead deje de
+  // llegar sin claves de coincidencia (hoy: EMQ 6,6, teléfono en 27,3%).
+  // Se borran en cuanto se usan — Ley 29733.
+  var _am = null;
+  try {
+    var _idAm = _p.get('id');
+    if(_idAm){
+      var _raw = sessionStorage.getItem('k2_am_' + _idAm);
+      if(_raw){ _am = JSON.parse(_raw); sessionStorage.removeItem('k2_am_' + _idAm); }
+    }
+  } catch(e){}
+  if(_am && (_am.em || _am.ph)) fbq('init','1290749182534707', _am);
+  else fbq('init','1290749182534707');
 fbq('track','PageView');
 const _p = new URLSearchParams(window.location.search);
 const _variant = _p.get('variant') || 'A';
@@ -243,6 +256,20 @@ s.parentNode.insertBefore(b, s);})(window.lintrk);
     .card{padding:40px 24px}
     .brand{top:20px;left:24px}
   }
+  /* ── Arreglos de la auditoría CRO, 02-sep-2026 ── */
+  /* --k2-text-dim daba 3,81:1 sobre la tarjeta, por debajo del 4,5:1 exigido */
+  :root{--k2-text-dim:#949494}
+  .aviso{
+    margin:6px 0 0;padding:14px 16px;text-align:left;
+    background:rgba(248,113,113,.1);border-left:3px solid #F87171;border-radius:4px;
+    font-size:13.5px;line-height:1.5;color:#FCA5A5;
+  }
+  .aviso strong{display:block;color:#fff;margin-bottom:3px}
+  .aviso a{color:var(--k2-primary);font-weight:600}
+  /* El centrado vertical con height:100% deja el borde superior de la tarjeta
+     fuera de alcance cuando es más alta que el viewport (zoom 200%, móvil chico) */
+  html,body{min-height:100%;height:auto}
+  body{align-items:flex-start}
 </style>
 </head>
 <body>
@@ -263,7 +290,12 @@ s.parentNode.insertBefore(b, s);})(window.lintrk);
     </div>
     <div class="eyebrow">Solicitud recibida</div>
     <h1>Gracias por <em>contactarnos</em></h1>
-    <p>Un ejecutivo de K2 te contactará en las próximas <strong>24 horas hábiles</strong> para coordinar tu diagnóstico de seguridad sin costo.</p>
+    <p id="msg-ok">Un ejecutivo de K2 te contactará en las próximas <strong>24 horas hábiles</strong> para coordinar tu diagnóstico de seguridad sin costo.</p>
+    <div id="msg-fallo" hidden role="alert" class="aviso">
+      <strong>Tu solicitud no se registró correctamente.</strong>
+      No queremos prometerte una llamada que no va a ocurrir:
+      <a href="javascript:history.back()">vuelve al formulario</a> y envíala de nuevo.
+    </div>
     <p style="font-size:13px;color:var(--k2-text-dim);">Hemos registrado tu solicitud y enviado los detalles a nuestro equipo comercial.</p>
 
     <div class="ref">REF · <span id="ref">K2-000000</span></div>
@@ -275,6 +307,14 @@ s.parentNode.insertBefore(b, s);})(window.lintrk);
   </div>
 
 <script>
+  // crm=0 lo manda index.html cuando el POST al CRM falló. Sin esto, la página
+  // de gracias afirmaba lo mismo en los dos casos.
+  if(_p.get('crm') === '0'){
+    const ok = document.getElementById('msg-ok');
+    const fallo = document.getElementById('msg-fallo');
+    if(ok) ok.hidden = true;
+    if(fallo) fallo.hidden = false;
+  }
   const urlId = _p.get('id');
   if(urlId) {
     document.getElementById('ref').textContent = urlId;
