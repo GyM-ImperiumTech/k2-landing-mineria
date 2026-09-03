@@ -428,6 +428,11 @@
     color:var(--white);
   }
   .form-sub{font-size:13px;color:var(--k2-text-muted);margin-top:8px;line-height:1.6;font-weight:300}
+  /* Ticket 12: certificaciones visibles sin scroll — mismo componente .trust-badge
+     del hero, en versión compacta dentro del form-header, para que aparezcan en
+     el primer viewport junto con el formulario (no solo en la columna del hero,
+     que en 1366px queda por debajo del pliegue). */
+  .form-trust{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 
   .field{margin-bottom:16px}
   .field__label{
@@ -1352,6 +1357,14 @@
         <h2 class="form-title" id="form-title">Solicita tu diagnóstico sin costo</h2>
         <p class="form-legend">Los campos con <span class="req" aria-hidden="true">*</span> son obligatorios.</p>
         <div class="form-sub">Un ejecutivo senior de operaciones mineras te llama en 24 h hábiles con un plan ajustado a tu faena.</div>
+        <!-- Sellos del PR #5 (ticket 12): en 1366px la columna del hero queda
+             por debajo del pliegue, así que aquí aparecen junto al formulario. -->
+        <div class="form-trust">
+          <span class="trust-badge">ISO 9001</span>
+          <span class="trust-badge">ISO 45001</span>
+          <span class="trust-badge">BASC</span>
+          <span class="trust-badge">SUCAMEC</span>
+        </div>
       </div>
 
       <div class="field">
