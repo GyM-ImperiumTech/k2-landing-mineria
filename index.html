@@ -6,6 +6,18 @@
 <title>K2 Seguridad y Resguardo — Contáctanos</title>
 <meta name="description" content="Soluciones de seguridad privada y resguardo para minería, logística, industria y salud. Solicita la llamada de un ejecutivo.">
 <script>
+  // Cada visita arranca en el hero, no donde quedó la anterior.
+  //
+  // Con el valor por omisión ("auto") el navegador restaura el scroll de la
+  // visita previa, y como `html` lleva `scroll-behavior:smooth` esa restauración
+  // se ANIMA: la página baja sola a la vista. En una landing de pauta eso es
+  // exactamente lo que no se quiere —el visitante de un anuncio tiene que ver la
+  // propuesta y el formulario, no la mitad de la página—, y encima la zona a la
+  // que salta suele aparecer con las imágenes todavía sin cargar.
+  //
+  // Tiene que ir antes de cualquier `scrollTo`, así que va acá arriba.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
   // Mobile: evitar auto-scroll al hash #formulario al cargar la página
   (function(){
     if(window.location.hash === '#formulario' && window.matchMedia('(max-width:768px)').matches){
