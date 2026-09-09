@@ -2461,12 +2461,12 @@
 
       if (esEmpleo && !yaMedido) {
         yaMedido = true;
-        if (typeof gtag === 'function') gtag('event','desvio_postulante',{form_id:'lead-form'});
+        if (typeof gtag === 'function') gtag('event','internal_hop',{form_id:'lead-form'});
       }
     });
 
     document.getElementById('empleo-cta')?.addEventListener('click', function(){
-      if (typeof gtag === 'function') gtag('event','click_portal_postulaciones',{destino:'postula.k2.com.pe'});
+      if (typeof gtag === 'function') gtag('event','internal_hop',{destino:'postula.k2.com.pe'});
     });
   })();
 
@@ -2630,7 +2630,7 @@
       [10,25,50,75,90,100].forEach(function(m){
         if(pct >= m && !depthFired[m]){
           depthFired[m] = true;
-          gtag('event', 'scroll', { percent_scrolled: m });
+          gtag('event', 'scroll_depth', { percent_scrolled: m });
         }
       });
     }
@@ -2657,7 +2657,7 @@
       el.addEventListener('blur', function(){
         var wrap = el.closest('.field');
         if(wrap && wrap.classList.contains('valid')){
-          gtag('event','form_field_complete',{field: fid, form_id:'lead-form'});
+          gtag('event','form_progress',{field: fid, form_id:'lead-form'});
         }
       });
     });
@@ -2781,7 +2781,7 @@
     document.querySelectorAll('a[href^="http"]').forEach(function(a){
       if(a.hostname !== window.location.hostname){
         a.addEventListener('click', function(){
-          gtag('event','click',{event_category:'outbound_link', event_label: a.href});
+          gtag('event','outbound_click',{event_category:'outbound_link', event_label: a.href});
         });
       }
     });
