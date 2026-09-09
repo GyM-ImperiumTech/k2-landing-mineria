@@ -1229,6 +1229,14 @@
      formulario caía a ~974 px. Con la caja fuera del grid, el ancla sigue
      existiendo para el scroll y no participa del layout. */
   #formulario{position:absolute;width:0;height:0;overflow:hidden;scroll-margin-top:88px}
+
+  /* Oculta el formulario comercial cuando alguien declara que busca trabajo.
+     Va por clase y no por el atributo `hidden` porque varios hijos del form
+     traen `display` propio (`.submit-btn` es flex) y eso le gana a la regla
+     [hidden]{display:none} del navegador: el botón de enviar seguía visible.
+     Usando una clase se preserva además el `hidden` original de cada bloque
+     —`#submit-fallback` nace oculto— que un toggle sobre `hidden` destapaba. */
+  .oculto-empleo{display:none!important}
   #lead-form{scroll-margin-top:88px}
 
   /* Toast: no cabía a 320px (sin max-width, con left:50% + translateX) y es el
@@ -1464,10 +1472,15 @@
         <!-- Los `value` son el nombre EXACTO del servicio en el catálogo del CRM,
              no slugs. `matchServiceFromText` (HermesV2 services.js:117) resuelve
              por nombre normalizado exacto —minúsculas, sin tildes, espacios
-             colapsados— y NO toca los underscores, así que `control_accesos`
-             nunca iba a encontrar "Control de accesos". Con los slugs solo
-             resolvía `resguardo`: 6 de 7 opciones entraban al CRM como texto
-             crudo, sin serviceId, y el informe por servicio quedaba vacío.
+             colapsados— y NO toca los underscores.
+
+             CORRECCIÓN del 09-sep: acá decía que con los slugs "6 de 7 opciones
+             entraban sin serviceId". Era falso. Medido con POST directos al
+             intake: el campo `intencion` pasa antes por un diccionario que
+             traduce todos los slugs históricos, así que resolvían igual. El
+             único valor que no resolvía era `otro`, corregido aparte.
+             El nombre literal se mantiene porque no depende de ese diccionario,
+             que es un intermediario que nadie garantiza.
              El texto visible es libre; el value tiene que calzar con el catálogo. -->
         <select class="input" id="intencion" name="intencion" required>
           <option value="" disabled selected>Selecciona…</option>
@@ -1477,11 +1490,28 @@
           <option value="Recuperación de espacios invadidos">Recuperación de espacios invadidos</option>
           <option value="Consultoría y diagnóstico de riesgos">Estudio de riesgos de la operación</option>
           <option value="Monitoreo y centro de control">Monitoreo, CCTV y central 24/7</option>
-          <option value="otro">Otro servicio de seguridad</option>
+          <option value="Servicios especiales">Otro servicio de seguridad</option>
+          <!-- La salida para quien busca empleo. Hasta el 09-sep-2026 esta landing
+               no nombraba el trabajo en ningún lado ni enlazaba a postula.k2.com.pe:
+               un postulante que llegaba desde un anuncio no tenía más opción que
+               llenar el formulario comercial. De ahí el 62 % de postulantes entre
+               los leads de pauta. El `value` empieza con `__` para que nunca se
+               confunda con un servicio del catálogo. -->
+          <option value="__EMPLEO">— Busco trabajo en K2 (no es un servicio)</option>
         </select>
         <div class="field__error">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           Selecciona una opción.
+        </div>
+      </div>
+
+      <div class="field" id="empleo-desvio" hidden>
+        <div style="border:1px solid rgba(0,244,237,.35);border-radius:10px;padding:16px 18px;background:rgba(0,244,237,.06)">
+          <p style="margin:0 0 8px;font-weight:700">Esta página es para empresas que contratan seguridad.</p>
+          <p style="margin:0 0 14px;opacity:.85">Si buscas trabajo en K2, las convocatorias vigentes están en el portal de postulaciones. Ahí sí puedes dejar tu CV.</p>
+          <a class="btn btn--primary" id="empleo-cta" style="display:inline-block"
+             href="https://postula.k2.com.pe/?utm_source=mineria&amp;utm_medium=desvio&amp;utm_campaign=desvio_postulante"
+             target="_blank" rel="noopener">Ver convocatorias de trabajo →</a>
         </div>
       </div>
 
@@ -1957,6 +1987,13 @@
 
   function datosActuales() {
     const v = (id) => (document.getElementById(id)?.value || '').trim();
+    // Quien eligió "Busco trabajo en K2" NO es un lead comercial. Se devuelve
+    // todo vacío a propósito: así `puntuar()` da 0, queda por debajo de MINIMO
+    // y el beacon no manda nada al CRM. Sin esto, un postulante que ya había
+    // escrito su teléfono entraría igual como abandono.
+    if (v('intencion') === '__EMPLEO') {
+      return { nombre:'', telefono:'', ruc:'', puesto:'', email:'', empresa:'', sector:'', comentario:'', intencion:'' };
+    }
     return {
       // `intencion` es el servicio que la persona vino a pedir, y es lo que
       // nombra la oportunidad en el CRM. El envío completo sí lo mandaba;
@@ -2196,6 +2233,15 @@
       }
       return;
     }
+    // Nadie que declaró "Busco trabajo en K2" entra al CRM comercial, aunque
+    // llegue acá por un camino que no previmos (autocompletado, teclado, un
+    // script). El desvío ya esconde el botón; esto es el cierre de verdad.
+    if (document.getElementById('intencion')?.value === '__EMPLEO') {
+      const d = document.getElementById('empleo-desvio');
+      if (d) { d.hidden = false; d.scrollIntoView({behavior:'smooth', block:'center'}); }
+      return;
+    }
+
     btn.disabled = true;
     btn.classList.add('sending');
     btn.querySelector('.btn-label').textContent = 'Enviando…';
@@ -2360,6 +2406,40 @@
       setTimeout(() => document.getElementById('intencion').focus(), 600);
     });
   });
+
+  // ---------- DESVÍO DE POSTULANTES ----------
+  // El 62 % de los leads de pauta eran postulantes, y la landing no les daba
+  // ninguna salida: no nombraba el trabajo ni enlazaba al portal. Al elegir
+  // "Busco trabajo en K2" se esconde el formulario comercial y se ofrece el
+  // portal de postulaciones, que es donde sí pueden dejar su CV.
+  (function(){
+    var sel = document.getElementById('intencion');
+    var desvio = document.getElementById('empleo-desvio');
+    var form = document.getElementById('lead-form');
+    if (!sel || !desvio || !form) return;
+    var yaMedido = false;
+
+    sel.addEventListener('change', function(){
+      var esEmpleo = sel.value === '__EMPLEO';
+      desvio.hidden = !esEmpleo;
+
+      // Se oculta todo el formulario menos el propio campo de intención (para
+      // que pueda cambiar de idea) y el bloque de desvío.
+      Array.prototype.forEach.call(form.children, function(el){
+        if (el === desvio || el.contains(sel)) return;
+        el.classList.toggle('oculto-empleo', esEmpleo);
+      });
+
+      if (esEmpleo && !yaMedido) {
+        yaMedido = true;
+        if (typeof gtag === 'function') gtag('event','desvio_postulante',{form_id:'lead-form'});
+      }
+    });
+
+    document.getElementById('empleo-cta')?.addEventListener('click', function(){
+      if (typeof gtag === 'function') gtag('event','click_portal_postulaciones',{destino:'postula.k2.com.pe'});
+    });
+  })();
 
   // ---------- SCROLL REVEAL ----------
   (function(){
