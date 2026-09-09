@@ -34,6 +34,35 @@
       });
     } catch(e){}
   })();
+  // Nucleo del contrato de medicion de K2: cinco dimensiones en TODOS los eventos
+  // de TODAS las superficies, para que la vertical sea un dato y no un contenedor.
+  // Equivalente tipado en k2-landing-riesgos/src/lib/nucleo.ts.
+  (function(){
+    function trafico(){
+      try {
+        var p = new URLSearchParams(location.search);
+        var marcas = ['fbclid','gclid','li_fat_id','utm_medium','ttclid','msclkid'];
+        for (var i=0;i<marcas.length;i++){ if (p.get(marcas[i])) return 'pauta'; }
+      } catch(e){}
+      var ref = document.referrer || '';
+      if (!ref) return 'directo';
+      try {
+        var h = new URL(ref).hostname;
+        // Subdominios de K2: comparten la cookie _ga, es la MISMA sesion. Llamarlo
+        // organico inventaria una visita nueva y le robaria la conversion al origen.
+        if (h === 'k2.com.pe' || h.slice(-11) === '.k2.com.pe') return 'interno';
+      } catch(e){ return 'directo'; }
+      return 'organico';
+    }
+    cfgGa4.k2_vertical    = 'mineria';
+    cfgGa4.k2_superficie  = 'landing_pauta';
+    // `desconocido` a proposito. Dar por sentado que quien llega por pauta viene a
+    // comprar es el error que dejo agosto con 238 leads y 0 comerciales: el publico
+    // se declara en el envio, no en la carga.
+    cfgGa4.k2_audiencia   = 'desconocido';
+    cfgGa4.k2_trafico     = trafico();
+    cfgGa4.k2_tag_version = '1.0.0';
+  })();
   gtag('config', 'G-JBNFWR6V2T', cfgGa4);
 </script>
 <!-- Facebook Pixel Code -->
