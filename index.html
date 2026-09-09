@@ -43,6 +43,13 @@
     } catch(e){}
   })();
   gtag('config', 'G-JBNFWR6V2T', cfgGa4);
+
+  // Destino de Google Ads. Sin esta línea el evento gtag('event','conversion',
+  // {send_to:'AW-18438919721/...'}) del submit handler no carga el destino y el
+  // hit se pierde en silencio — mismo bug que tuvo agro entre el 8-sep (commit
+  // d57b950, sin esta línea) y su corrección posterior. send_page_view:false
+  // porque las vistas de página ya las cuenta GA4; acá solo interesa la conversión.
+  gtag('config', 'AW-18438919721', { send_page_view: false });
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
