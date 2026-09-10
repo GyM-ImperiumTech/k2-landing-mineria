@@ -95,7 +95,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Roboto:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Roboto:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Roboto:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600&display=swap"></noscript>
 <style>
   :root{
     /* === K2 Brand (sitio Elementor) === */
@@ -266,12 +267,15 @@
   }
   .hero-bgimg{
     position:absolute;inset:0;z-index:0;pointer-events:none;
-    background-image:url('/img/hero-bg.jpg');
+    background-image:url('/img/hero-bg-movil.jpg');
     background-size:cover;background-position:center;
     opacity:.18;
     mix-blend-mode:luminosity;
     mask-image:linear-gradient(90deg, transparent 0%, black 20%, black 80%, transparent 100%);
     -webkit-mask-image:linear-gradient(90deg, transparent 0%, black 20%, black 80%, transparent 100%);
+  }
+  @media (min-width:761px){
+    .hero-bgimg{background-image:url('/img/hero-bg.jpg')}
   }
   .hero-bgimg::after{
     content:"";position:absolute;inset:0;
@@ -1412,6 +1416,8 @@
   }
 </style>
 
+<link rel="preload" as="image" href="/img/hero-bg-movil.jpg" media="(max-width:760px)">
+<link rel="preload" as="image" href="/img/hero-bg.jpg" media="(min-width:761px)">
 </head>
 <body>
 <!-- Urgency bar removida -->
