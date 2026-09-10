@@ -84,6 +84,13 @@
     cfgGa4.k2_tag_version = '1.0.0';
   })();
   gtag('config', 'G-JBNFWR6V2T', cfgGa4);
+
+  // Destino de Google Ads. Sin esta línea el evento gtag('event','conversion',
+  // {send_to:'AW-18438919721/...'}) del submit handler no carga el destino y el
+  // hit se pierde en silencio — mismo bug que tuvo agro entre el 8-sep (commit
+  // d57b950, sin esta línea) y su corrección posterior. send_page_view:false
+  // porque las vistas de página ya las cuenta GA4; acá solo interesa la conversión.
+  gtag('config', 'AW-18438919721', { send_page_view: false });
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2359,6 +2366,8 @@
     const pageVariant = (document.querySelector('input[name="variant"]')?.value || 'A').toUpperCase();
     if(typeof gtag === 'function'){
       gtag('event','generate_lead',{currency:'PEN', value:1, lead_id: leadId||'', utm_source: utms.utm_source||'', utm_campaign: utms.utm_campaign||'', sector: payload.sector||'', page_variant: pageVariant});
+      // Event snippet for LEAD_MINERIA_LANDING conversion page
+      gtag('event', 'conversion', {'send_to': 'AW-18438919721/AYXRCKqtu_IcEKmsrthE'});
     }
 
     // 4. Insider — retirado 11-ago-2026 por decisión de negocio (ya no se usa la herramienta).
