@@ -97,7 +97,12 @@ if (_eid) {
   var _yaDisparado = false;
   try { _yaDisparado = sessionStorage.getItem('k2_lead_' + _eid) === '1'; } catch(e){}
   if (!_yaDisparado) {
-    fbq('track','Lead',{currency:'PEN', value:1, content_category:'mineria', content_name: _variant},{eventID: _eid});
+    // content_category = vertical y k2_audiencia = poblacion, para que la
+    // conversion personalizada de Meta se arme sobre parametros y NO sobre la
+    // URL: las reglas por URL dependen de event_source_url, que es justo lo que
+    // se degrada al mandar el evento por CAPI.
+    fbq('track','Lead',{currency:'PEN', value:1, content_category:'mineria', content_name: _variant,
+      k2_vertical:'mineria', k2_audiencia:'comprador_b2b', k2_superficie:'landing_pauta'},{eventID: _eid});
     // Stub auto-inicializable: el snippet de LinkedIn (que define window.lintrk de
     // verdad) vive mas abajo en el documento, asi que aca todavia no existe. Sin
     // este stub, "typeof window.lintrk === 'function'" da false y la llamada se
