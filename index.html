@@ -47,7 +47,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Roboto:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     /* === K2 Brand (sitio Elementor) === */
@@ -110,9 +110,16 @@
     --border-strong:var(--k2-border-strong);
     --border-focus:var(--k2-primary);
 
-    --font-sans:'Poppins','Roboto',system-ui,sans-serif;
-    --font-display:'Roboto','Poppins',system-ui,sans-serif;
-    --font-slab:'Roboto Slab','Roboto',serif;
+    --font-sans:'Poppins',system-ui,sans-serif;
+    --font-display:'Poppins',system-ui,sans-serif;
+    --font-slab:'Poppins',system-ui,sans-serif;
+
+    /* Terciarios del brandbook K2 (2026): para texto/acentos sobre fondo
+       claro — el cyan de marca (--k2-primary) es ilegible como texto sobre
+       blanco, por eso el brandbook define estos tonos más oscuros para esos
+       casos. Hoy solo la sección "Cómo trabajamos" usa fondo blanco. */
+    --k2-brand-navy:#293D4A;
+    --k2-brand-teal:#008D9B;
     --font-mono:ui-monospace,'SF Mono','Cascadia Code',monospace;
 
     /* Modo oscuro K2 (default — es la marca) */
@@ -148,6 +155,7 @@
     -moz-osx-font-smoothing:grayscale;
     font-size:15px;line-height:1.65;
     transition:background .3s, color .3s;
+    padding-bottom:72px; /* espacio para el sticky-cta — mobile-first: se quita en desktop (min-width:761px) */
   }
   h1,h2,h3,h4,h5{font-family:var(--font-display);font-weight:600}
   img{max-width:100%;display:block}
@@ -219,15 +227,32 @@
   .hero-bgimg{
     position:absolute;inset:0;z-index:0;pointer-events:none;
     background-image:url('/img/hero-bg.jpg');
-    background-size:cover;background-position:center;
-    opacity:.18;
+    background-size:cover;background-position:center 30%;
+    opacity:.14;
     mix-blend-mode:luminosity;
     mask-image:linear-gradient(90deg, transparent 0%, black 20%, black 80%, transparent 100%);
     -webkit-mask-image:linear-gradient(90deg, transparent 0%, black 20%, black 80%, transparent 100%);
   }
   .hero-bgimg::after{
     content:"";position:absolute;inset:0;
-    background:linear-gradient(180deg, rgba(5,15,26,.3) 0%, rgba(5,15,26,.75) 100%);
+    background:linear-gradient(180deg, rgba(5,15,26,.45) 0%, rgba(5,15,26,.82) 100%);
+  }
+  /* Panel de foto: instancia nítida (a diferencia de .hero-bgimg, que es una
+     textura de fondo muy tenue). Vive como columna propia en el hero-grid.
+     Sin marco/tarjeta: se funde con el fondo oscuro del hero (mask + degradado)
+     para que se sienta parte de la composición y no un recorte en franja. */
+  .hero-photo{
+    position:relative;z-index:1;
+  }
+  .hero-photo img{
+    width:100%;height:100%;object-fit:cover;object-position:center 12%;
+    display:block;
+    mask-image:linear-gradient(90deg, transparent 0%, black 14%, black 86%, transparent 100%);
+    -webkit-mask-image:linear-gradient(90deg, transparent 0%, black 14%, black 86%, transparent 100%);
+  }
+  .hero-photo::after{
+    content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg, rgba(5,15,26,.5) 0%, transparent 20%, transparent 74%, rgba(5,15,26,.6) 100%);
   }
   .hero::before{
     content:"";position:absolute;inset:0;
@@ -340,8 +365,8 @@
     color:var(--white);
   }
   h1.hero-title em{
-    font-style:italic;color:var(--k2-primary);
-    font-family:var(--font-slab);font-weight:500;
+    font-style:normal;color:var(--k2-primary);
+    font-family:var(--font-display);font-weight:800;
     background:none;-webkit-text-fill-color:currentColor;
     position:relative;display:inline-block;
     text-shadow:0 0 30px rgba(0,244,237,.5);
@@ -363,7 +388,7 @@
   }
   .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
   .hero-stats{
-    display:grid;grid-template-columns:repeat(4,auto);gap:40px;flex-wrap:wrap;
+    display:grid;grid-template-columns:repeat(2,1fr);gap:24px;flex-wrap:wrap;
     margin-top:44px;padding-top:32px;
     border-top:1px solid rgba(255,255,255,.12);
   }
@@ -387,10 +412,12 @@
 
   /* ---------- FORM CARD ---------- */
   .form-card{
-    background:linear-gradient(180deg, rgba(31,32,32,.95), rgba(15,16,16,.95));
-    backdrop-filter:blur(10px);
+    background-image:url('/img/hero-bg-mineria.jpg');
+    background-size:cover;
+    background-position:center;
     color:var(--white);
-    padding:36px;position:relative;
+    padding:20px 18px;position:relative;
+    max-width:100%;margin:0 auto 32px;width:100%;
     border-radius:10px;
     border:1px solid var(--k2-border-strong);
     box-shadow:
@@ -399,11 +426,10 @@
       inset 0 1px 0 rgba(255,255,255,.05);
   }
   .form-card::before{
-    content:"";position:absolute;
-    top:-1px;left:-1px;right:-1px;height:3px;
-    background:linear-gradient(90deg, transparent, var(--k2-primary), transparent);
-    border-radius:10px 10px 0 0;
-    box-shadow:0 0 24px rgba(0,244,237,.7);
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(135deg, rgba(5,15,26,.35) 0%, rgba(10,20,35,.45) 100%);
+    border-radius:10px;
+    z-index:1;
   }
   .form-card::after{
     content:"";position:absolute;
@@ -412,7 +438,7 @@
     z-index:-1;filter:blur(8px);opacity:.6;
     pointer-events:none;
   }
-  .form-header{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--k2-border)}
+  .form-header{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--k2-border);position:relative;z-index:2}
   .form-badge{
     display:inline-flex;align-items:center;gap:6px;
     padding:4px 10px;border-radius:2px;
@@ -434,7 +460,7 @@
      que en 1366px queda por debajo del pliegue). */
   .form-trust{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 
-  .field{margin-bottom:16px}
+  .field{margin-bottom:16px;position:relative;z-index:2}
   .field__label{
     display:block;font-family:var(--font-display);
     font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
@@ -453,7 +479,12 @@
   }
   .textarea{height:auto;padding:12px 14px;min-height:84px;resize:vertical;line-height:1.6}
   select.input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238fa5bf' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
-  select.input option{background:#0d1f1f;color:#fff;}
+  select.input option{background:#293D4A;color:#fff;}
+  select.input optgroup{background:#293D4A;color:var(--k2-primary);font-style:normal;font-weight:600}
+  /* Resaltado de la opción activa: soporte parcial entre navegadores (Chrome
+     lo ignora en el dropdown nativo, Firefox sí lo aplica) — mejora
+     progresiva, no rompe nada donde no se soporta. */
+  select.input option:checked{background:var(--k2-primary);color:var(--k2-bg)}
   .input::placeholder,.textarea::placeholder{color:#909090}   /* 5,23:1 — antes #7A7A7A = 3,89:1 */
   .input:focus,.textarea:focus{
     border-color:var(--k2-primary);
@@ -649,8 +680,8 @@
     text-transform:uppercase;
   }
   h2 em{
-    font-style:italic;color:var(--k2-primary);
-    font-family:var(--font-slab);font-weight:500;
+    font-style:normal;color:var(--k2-primary);
+    font-family:var(--font-display);font-weight:800;
     text-transform:none;letter-spacing:-.01em;
     text-shadow:0 0 24px rgba(0,244,237,.4);
   }
@@ -659,8 +690,9 @@
     max-width:620px;line-height:1.7;font-weight:300;
   }
 
-  /* Servicios */
-  .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  /* Servicios: los 3 núcleos de la landing — tarjeta ampliada con propuesta de
+     valor, capacidades y resultado. */
+  .services-grid{display:grid;grid-template-columns:1fr;gap:18px;align-items:stretch}
   .svc{
     background:linear-gradient(180deg, var(--k2-surface), rgba(15,16,16,.9));
     border:1px solid var(--k2-border);
@@ -668,7 +700,7 @@
     display:flex;flex-direction:column;
     transition:all 300ms cubic-bezier(.2,.8,.2,1);
     position:relative;overflow:hidden;isolation:isolate;
-    text-decoration:none;color:inherit;
+    height:100%;
   }
   .svc::after{
     content:"";position:absolute;top:0;left:0;right:0;height:1px;
@@ -676,17 +708,18 @@
     opacity:0;transition:opacity 300ms ease;z-index:3;
   }
   .svc:hover{
-    border-color:rgba(0,244,237,.45);
-    box-shadow:0 22px 44px -10px rgba(0,0,0,.65), 0 0 32px rgba(0,244,237,.22);
-    transform:translateY(-4px);
+    border-color:rgba(0,244,237,.5);
+    box-shadow:0 22px 44px -10px rgba(0,0,0,.65), 0 0 36px rgba(0,244,237,.28);
   }
   .svc:hover::after{opacity:1}
+  /* Imagen deliberadamente compacta: la tarjeta se sostiene con el texto, no
+     con la foto (antes ocupaba 4:3, casi la mitad de la tarjeta). */
   .svc-imgwrap{
-    position:relative;aspect-ratio:4/3;overflow:hidden;
+    position:relative;aspect-ratio:21/9;overflow:hidden;
     background:radial-gradient(circle at 50% 55%, #0a1722 0%, #000 100%);
   }
   .svc-imgwrap img{
-    width:100%;height:100%;object-fit:contain;object-position:center top;
+    width:100%;height:100%;object-fit:cover;object-position:center 20%;
     transition:transform 500ms cubic-bezier(.2,.8,.2,1), filter 300ms ease;
     filter:saturate(.9) brightness(.95);
   }
@@ -700,31 +733,152 @@
     filter:saturate(1) brightness(1);
   }
   .svc-body{
-    padding:18px 18px 20px;
-    display:flex;flex-direction:column;gap:8px;flex:1;
+    padding:20px 20px 22px;
+    display:flex;flex-direction:column;gap:10px;flex:1;
   }
   .svc-num{
     font-family:var(--font-display);font-size:9px;font-weight:500;
     color:var(--k2-primary);letter-spacing:.14em;
   }
+  .svc-eyebrow{
+    font-family:var(--font-display);font-size:10px;font-weight:600;
+    color:var(--k2-text-dim);letter-spacing:.16em;text-transform:uppercase;
+  }
   .svc h3{
     font-family:var(--font-display);
-    font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.3;
-    color:var(--white);
+    font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.3;
+    color:var(--white);margin-top:2px;
   }
-  .svc-desc{
-    font-size:12px;color:var(--k2-text-muted);line-height:1.55;font-weight:300;
+  .svc-value{
+    font-size:13px;color:var(--k2-text-muted);line-height:1.55;font-weight:300;
   }
-  .svc-cta{
-    margin-top:auto;padding-top:8px;
-    font-family:var(--font-display);font-size:11px;font-weight:500;
-    color:var(--k2-primary);letter-spacing:.08em;
-    transition:transform 200ms ease, letter-spacing 200ms ease;
+  .svc-caps{
+    list-style:none;display:flex;flex-direction:column;gap:6px;
+    margin:4px 0 0;padding:0;
   }
-  .svc:hover .svc-cta{transform:translateX(3px);letter-spacing:.1em}
+  .svc-caps li{
+    font-size:12.5px;color:rgba(255,255,255,.82);line-height:1.4;font-weight:300;
+    display:flex;align-items:flex-start;gap:8px;
+  }
+  .svc-caps li::before{
+    content:"";flex-shrink:0;width:5px;height:5px;border-radius:50%;
+    background:var(--k2-primary);margin-top:6px;
+    box-shadow:0 0 6px var(--k2-primary);
+  }
+  .svc-resultado{
+    margin-top:auto;padding-top:12px;
+    font-size:12.5px;color:rgba(255,255,255,.9);line-height:1.5;font-weight:400;
+  }
+  .svc-resultado strong{color:var(--k2-primary);font-weight:600}
+  .svc-cta-btn{
+    margin-top:12px;width:100%;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:44px;padding:0 18px;border-radius:4px;
+    background:transparent;color:var(--k2-primary);
+    border:1.5px solid var(--k2-primary);
+    font-family:var(--font-display);font-size:12px;font-weight:600;
+    letter-spacing:.04em;text-decoration:none;text-align:center;
+    transition:all 200ms ease;
+  }
+  .svc-cta-btn:hover{background:var(--k2-primary-soft)}
+
+  /* Cómo trabajamos (.wfh = "workflow hero"): única sección de la landing en
+     fondo blanco, según brandbook K2 — texto en #293D4A (terciario de marca)
+     en vez de blanco, y acentos en #008D9B (terciario) en vez del cyan
+     #00F4ED de marca: ese cyan es ilegible como texto sobre blanco, por eso
+     el brandbook define un terciario más oscuro para superficies claras.
+     Mobile-first: base = una columna (copy arriba, imagen abajo); desktop
+     (min-width:1001px) arma las 2 columnas con las tarjetas flotando sobre
+     la imagen, tal como la referencia. */
+  /* Sin el glow/línea divisoria cyan de las demás secciones — están pensados
+     para fondo oscuro y se ven como una mancha sobre blanco. */
+  .wfh::before,.wfh::after{display:none}
+  .wfh{background:#fff;padding:64px 0}
+  .wfh-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center}
+  .wfh-eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--font-display);font-size:11px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--k2-brand-teal);
+  }
+  .wfh-eyebrow::before{content:"";width:24px;height:1px;background:var(--k2-brand-teal)}
+  .wfh-title{
+    margin-top:14px;
+    font-family:var(--font-display);font-weight:800;
+    font-size:clamp(30px,4.5vw,46px);line-height:1.12;letter-spacing:-.01em;
+    color:var(--k2-brand-navy);text-transform:none;
+  }
+  .wfh-title em{font-style:normal;color:var(--k2-brand-teal)}
+  .wfh-subtitle{
+    margin-top:16px;max-width:460px;
+    font-size:16px;line-height:1.6;font-weight:400;color:#5B6B76;
+  }
+  .wfh-badges{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+  .wfh-badge{
+    display:flex;align-items:center;gap:12px;
+    background:#fff;border:1px solid rgba(41,61,74,.1);border-radius:12px;
+    padding:14px 16px;
+    box-shadow:0 10px 24px -8px rgba(41,61,74,.12);
+  }
+  .wfh-badge-icon{
+    display:flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:50%;flex-shrink:0;
+    background:rgba(0,141,155,.1);color:var(--k2-brand-teal);
+  }
+  .wfh-badge-text{font-size:13px;color:var(--k2-brand-navy);font-weight:400}
+  .wfh-badge-text strong{font-weight:700}
+  .wfh-tag{
+    display:inline-block;margin-top:20px;
+    font-family:var(--font-display);font-size:10.5px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--k2-brand-teal);
+    border:1px solid rgba(0,141,155,.3);border-radius:20px;padding:6px 14px;
+  }
+
+  .wfh-media{position:relative}
+  .wfh-imgwrap{position:relative;border-radius:20px;overflow:hidden;background:#0A0A0B}
+  .wfh-imgwrap img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/5;display:block}
+  .wfh-float{
+    display:flex;align-items:center;gap:10px;
+    background:#fff;border-radius:12px;padding:10px 14px;
+    box-shadow:0 14px 30px -10px rgba(41,61,74,.25);
+    margin-top:10px;
+  }
+  .wfh-float-icon{
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(0,141,155,.1);color:var(--k2-brand-teal);
+  }
+  .wfh-float-text{display:flex;flex-direction:column;gap:2px}
+  .wfh-float strong{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--k2-brand-navy)}
+  .wfh-float span{font-size:11px;color:#8A97A1}
+  .wfh-float--brand strong{color:var(--k2-brand-teal)}
+  .wfh-float--brand .wfh-float-icon{background:rgba(0,244,237,.12)}
+
+  .wfh-bottom{margin-top:48px;text-align:center;max-width:640px}
+  .wfh-tagline{
+    font-family:var(--font-display);font-size:20px;font-weight:700;
+    color:var(--k2-brand-navy);
+  }
+  .wfh-tagline em{font-style:normal;color:var(--k2-brand-teal)}
+  .wfh-closing{margin-top:10px;font-size:15px;line-height:1.7;color:#5B6B76;font-weight:400}
+  .wfh-trust{
+    margin-top:20px;font-family:var(--font-display);font-size:11px;font-weight:600;
+    letter-spacing:.1em;text-transform:uppercase;color:#8A97A1;
+  }
+  @media (min-width:1001px){
+    .wfh{padding:110px 0}
+    .wfh-grid{grid-template-columns:1fr 1fr;gap:64px}
+    .wfh-imgwrap img{aspect-ratio:1/1.05}
+    .wfh-float{
+      position:absolute;margin-top:0;width:200px;
+    }
+    .wfh-float--brand{top:24px;right:-24px}
+    .wfh-float--stat1{top:42%;right:-32px}
+    .wfh-float--stat2{top:64%;right:-16px}
+    .wfh-bottom{margin-left:auto;margin-right:auto;margin-top:64px}
+  }
 
   /* 5 Razones */
-  .reasons-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px}
+  .reasons-grid{display:grid;grid-template-columns:1fr;gap:24px}
   .reason{
     padding:28px 22px 22px;
     border:1px solid var(--k2-border);
@@ -746,8 +900,14 @@
     box-shadow:0 14px 28px -10px rgba(0,0,0,.6), 0 0 24px rgba(0,244,237,.12);
   }
   .reason:hover::before{transform:scaleX(1);box-shadow:0 0 16px var(--k2-primary)}
+  .reason-icon{
+    display:flex;align-items:center;justify-content:center;
+    width:40px;height:40px;border-radius:50%;margin-bottom:16px;
+    background:var(--k2-primary-soft);color:var(--k2-primary);
+    box-shadow:0 0 0 1px rgba(0,244,237,.2);
+  }
   .reason-n{
-    font-family:var(--font-slab);font-size:40px;font-weight:500;font-style:italic;
+    font-family:var(--font-display);font-size:40px;font-weight:800;font-style:normal;
     color:var(--k2-primary);margin-bottom:14px;letter-spacing:-.02em;line-height:1;
     text-shadow:0 0 24px rgba(0,244,237,.35);
   }
@@ -758,6 +918,54 @@
   }
   .reason p{
     font-size:13px;color:var(--k2-text-muted);line-height:1.6;font-weight:300;
+  }
+
+  /* Diferenciales: continuidad de equipo + respuesta coordinada.
+     Versión condensada a propósito — sin listas largas ni diagramas — para
+     no saturar una página que ya reúne servicios, flujo y certificaciones. */
+  .diff-grid{display:grid;grid-template-columns:1fr;gap:36px;margin-top:8px}
+  .diff-col{display:flex;flex-direction:column;gap:12px}
+  .diff-icon{
+    display:flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:50%;margin-bottom:4px;
+    background:var(--k2-primary-soft);color:var(--k2-primary);
+    box-shadow:0 0 0 1px rgba(0,244,237,.2);
+  }
+  .diff-eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--font-display);font-size:11px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--k2-primary);
+  }
+  .diff-eyebrow::before{content:"";width:24px;height:1px;background:var(--k2-primary)}
+  .diff-col h3{
+    font-family:var(--font-display);font-size:22px;font-weight:700;
+    line-height:1.3;color:var(--white);text-transform:none;letter-spacing:-.01em;
+  }
+  .diff-col h3 em{
+    font-style:normal;color:var(--k2-primary);font-family:var(--font-display);
+  }
+  .diff-text{font-size:13.5px;color:var(--k2-text-muted);line-height:1.6;font-weight:300}
+  .diff-stat{
+    margin-top:auto;padding:18px 20px;
+    border-top:1px solid var(--k2-border);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(0,244,237,.08), rgba(0,244,237,0) 60%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .diff-stat-label{
+    font-family:var(--font-display);font-size:10px;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--k2-text-dim);
+  }
+  .diff-stat-value{
+    margin-top:6px;font-family:var(--font-display);font-size:24px;font-weight:700;
+    letter-spacing:-.01em;color:var(--white);line-height:1.3;
+  }
+  .diff-stat-value em{
+    font-style:normal;color:var(--k2-primary);
+    text-shadow:0 0 28px rgba(0,244,237,.65), 0 0 8px rgba(0,244,237,.5);
+  }
+  @media (min-width:821px){
+    .diff-grid{grid-template-columns:repeat(2,1fr);gap:40px}
   }
 
   /* Certificaciones */
@@ -772,11 +980,25 @@
       repeating-linear-gradient(90deg,rgba(255,255,255,.015) 0 1px,transparent 1px 60px);
     pointer-events:none;
   }
-  .certs .section-head,.certs-grid{position:relative;z-index:1}
-  .certs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
-  @media (max-width:900px){.certs-grid{grid-template-columns:repeat(2,1fr)}}
-  @media (max-width:520px){.certs-grid{grid-template-columns:1fr}}
+  .certs .section-head,.certs-marquee{position:relative;z-index:1}
+  /* Certificaciones: carrusel plano y continuo (sin arco 3D, a diferencia de
+     Clientes) — franja horizontal a velocidad constante en loop perfecto. */
+  .certs-marquee{
+    overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .certs-marquee-track{
+    display:flex;width:max-content;
+    animation:certs-scroll 26s linear infinite;
+  }
+  .certs-marquee:hover .certs-marquee-track{animation-play-state:paused}
+  @keyframes certs-scroll{
+    from{transform:translateX(0)}
+    to{transform:translateX(-50%)}
+  }
   .cert{
+    flex:0 0 240px;margin-right:24px;
     border:1px solid var(--k2-border);
     border-radius:12px;padding:24px;
     display:flex;flex-direction:column;gap:18px;
@@ -823,7 +1045,7 @@
     padding:24px 0 8px;
   }
   .carousel-stage{
-    position:relative;flex:1;height:300px;min-width:0;
+    position:relative;flex:1;height:190px;min-width:0;
     perspective:1400px;overflow:hidden;
   }
   .carousel-stage-inner{
@@ -840,7 +1062,7 @@
   .carousel-arrow:active{transform:scale(.95)}
   .client-logo{
     aspect-ratio:2.2/1;min-height:110px;border-radius:10px;
-    background:rgba(255,255,255,.97);border:1px solid var(--k2-border);
+    background:#fff;border:1px solid var(--k2-border);
     display:flex;align-items:center;justify-content:center;
     padding:8px 14px;text-align:center;
     transition:all 220ms ease;
@@ -848,15 +1070,14 @@
   }
   .carousel-stage .client-logo{
     position:absolute;top:50%;left:50%;
-    width:440px;height:210px;min-height:0;aspect-ratio:auto;
-    padding:22px 30px;
+    width:270px;height:130px;min-height:0;aspect-ratio:auto;
+    padding:12px 18px;
     will-change:transform,opacity;
     transition:background 220ms ease,border-color 220ms ease,box-shadow 220ms ease;
   }
-  @media (max-width:640px){
-    .carousel-stage{height:190px}
-    .carousel-stage .client-logo{width:270px;height:130px;padding:12px 18px}
-    .carousel-arrow{width:40px;height:40px}
+  @media (min-width:641px){
+    .carousel-stage{height:300px}
+    .carousel-stage .client-logo{width:440px;height:210px;padding:22px 30px}
   }
   .client-logo img{
     max-width:100%;max-height:100%;width:100%;height:100%;
@@ -871,6 +1092,27 @@
     transform:translateY(-3px);
   }
   .client-logo:hover img{filter:saturate(1.1);transform:scale(1.06)}
+
+  /* CASOS / EXPERIENCIA */
+  .casos-section{padding:80px 0;background:var(--k2-surface)}
+  .casos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:32px;margin-top:48px}
+  .caso-card{
+    background:rgba(0,244,237,.06);border:1px solid rgba(0,244,237,.2);border-radius:12px;
+    padding:32px;transition:all 300ms ease;
+  }
+  .caso-card:hover{background:rgba(0,244,237,.1);border-color:rgba(0,244,237,.4);transform:translateY(-4px)}
+  .caso-icon{width:48px;height:48px;border-radius:50%;background:rgba(0,244,237,.15);display:flex;align-items:center;justify-content:center;color:var(--k2-primary);margin-bottom:20px}
+  .caso-sector{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--k2-primary);font-weight:600;margin-bottom:12px}
+  .caso-title{font-size:20px;font-weight:700;color:var(--white);margin-bottom:16px}
+  .caso-item{margin-bottom:20px}
+  .caso-item-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--k2-text-muted);font-weight:600;margin-bottom:6px}
+  .caso-item-text{font-size:14px;line-height:1.6;color:var(--k2-text)}
+  .caso-resultado{background:rgba(97,206,112,.1);border-left:3px solid var(--k2-accent);padding:16px;margin-top:20px;border-radius:4px}
+  .caso-resultado-text{font-size:13px;color:var(--white);font-weight:500}
+  @media (max-width:768px){
+    .casos-grid{grid-template-columns:1fr;gap:24px}
+    .caso-card{padding:24px}
+  }
 
   .cta-final{
     background:linear-gradient(180deg, var(--k2-bg) 0%, var(--k2-surface) 30%, var(--k2-surface) 70%, var(--k2-bg) 100%);
@@ -888,7 +1130,7 @@
     pointer-events:none;
   }
   .cta-final-inner{
-    display:grid;grid-template-columns:1.5fr auto;gap:48px;align-items:center;
+    display:grid;grid-template-columns:1fr;gap:24px;align-items:center;
     position:relative;z-index:1;
   }
   .cta-final h2{color:var(--white)}
@@ -900,6 +1142,7 @@
     font-family:var(--font-display);font-weight:700;font-size:13px;
     letter-spacing:.14em;text-transform:uppercase;
     text-decoration:none;display:inline-flex;align-items:center;gap:12px;
+    width:100%;justify-content:center;
     border-radius:4px;position:relative;
     transition:all 300ms cubic-bezier(.2,.8,.2,1);
     box-shadow:0 0 40px rgba(0,244,237,.4), inset 0 1px 0 rgba(255,255,255,.3);
@@ -1032,7 +1275,7 @@
   /* ---------- STICKY MOBILE CTA ---------- */
   .sticky-cta{
     position:fixed;bottom:0;left:0;right:0;z-index:90;
-    display:none;gap:8px;padding:10px 12px;
+    display:flex;gap:8px;padding:10px 12px;
     background:linear-gradient(180deg, rgba(0,0,0,.8), rgba(0,0,0,.95));
     backdrop-filter:blur(12px);
     border-top:1px solid rgba(0,244,237,.25);
@@ -1094,47 +1337,64 @@
   .nav-right .btn-accent{
     box-shadow:0 0 16px rgba(0,244,237,.25);
   }
+  .nav-menu{
+    display:none;flex:1;justify-content:center;gap:32px;
+  }
+  .nav-menu a{
+    color:var(--k2-text-muted);text-decoration:none;font-size:13px;font-weight:500;
+    transition:color 200ms ease;
+  }
+  .nav-menu a:hover{color:var(--k2-primary)}
+  @media (min-width:801px){
+    .nav-menu{display:flex}
+  }
 
   /* ---------- REASONS: stagger ---------- */
   .reason{transition:all 300ms cubic-bezier(.2,.8,.2,1), opacity 700ms ease, transform 700ms ease}
 
-  /* Responsive */
-  @media (max-width:760px){
-    .sticky-cta{display:flex}
-    body{padding-bottom:72px}
-    .cta-final-inner{grid-template-columns:1fr;gap:24px}
-    .cta-btn-big{width:100%;justify-content:center}
-  }
-  @media (max-width:1000px){
-    .hero-grid{grid-template-columns:1fr;gap:40px}
-    .form-card{max-width:560px;margin:0 auto;width:100%}
+  /* Responsive — mobile-first. Bases pensadas para celular; cada
+     min-width agrega SOLO lo que cambia al crecer la pantalla. Los valores
+     vienen de una auditoría (getComputedStyle a 9 anchos, 320→1280) hecha
+     antes de esta reescritura, no de releer el CSS viejo — así se preserva
+     el comportamiento real, bugs de especificidad incluidos (ver nota sobre
+     .hero-title y .orb más abajo), en vez del que el CSS anterior aparentaba
+     tener. */
+  section{padding:64px 0}
+  .container{padding:0 20px}
+  .services-grid,.reasons-grid{grid-template-columns:1fr}
+  .stat-num{font-size:26px}
+  .row-2{grid-template-columns:1fr}
+  @media (min-width:561px){
+    .container{padding:0 32px}
+    .stat-num{font-size:42px}
     .services-grid{grid-template-columns:repeat(2,1fr)}
     .reasons-grid{grid-template-columns:repeat(3,1fr)}
-    .certs-grid{grid-template-columns:repeat(2,1fr)}
-    .foot-grid{grid-template-columns:1fr}
-    .cta-final-inner{grid-template-columns:1fr;gap:24px}
-    .nav-phone{display:none}
-    section{padding:64px 0}
-    .hero{padding:48px 0 64px}
-    .hero-stats{grid-template-columns:repeat(2,1fr);gap:24px}
   }
-  @media (max-width:640px){
-    .row-2{grid-template-columns:1fr}
+  @media (min-width:641px){
+    .row-2{grid-template-columns:repeat(2,1fr)}
   }
-  @media (max-width:560px){
-    .container{padding:0 20px}
-    .services-grid,.reasons-grid,.certs-grid{grid-template-columns:1fr}
-    .stat-num{font-size:26px}
-    .form-card{padding:24px 20px;max-width:100%}
+  @media (min-width:761px){
+    .sticky-cta{display:none}
+    body{padding-bottom:0}
+    .cta-btn-big{width:auto;justify-content:normal}
+    .svc-cta-btn{width:auto}
+  }
+  @media (min-width:1001px){
+    section{padding:110px 0}
+    .services-grid{grid-template-columns:repeat(3,1fr)}
+    .reasons-grid{grid-template-columns:repeat(5,1fr)}
+    .cta-final-inner{grid-template-columns:1.5fr auto;gap:48px}
+    .hero-stats{grid-template-columns:repeat(4,auto);gap:40px}
   }
 
   /* B: Mobile — hero-sub muestra una version corta y completa (3 lineas) en vez de
      cortar la frase larga a medias con line-clamp. Reemplaza el hack anterior:
      antes esto truncaba el texto completo con "..." a mitad de oracion. */
-  .hero-sub-mobile{display:none}
-  @media (max-width:768px){
-    .hero-sub-full{display:none}
-    .hero-sub-mobile{display:inline}
+  .hero-sub-mobile{display:inline}
+  .hero-sub-full{display:none}
+  @media (min-width:769px){
+    .hero-sub-full{display:inline}
+    .hero-sub-mobile{display:none}
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -1259,16 +1519,13 @@
       transition-duration:.01ms!important;
     }
     html{scroll-behavior:auto}
-    .orb,.hero-glow-line,.section-glow,.section-divider::before{animation:none}
+    .orb,.hero-glow-line,.section-glow,.section-divider::before,.certs-marquee-track{animation:none}
     #particles{display:none!important}
   }
 
   /* El nav a 320px no tenía sitio para su contenido (426px calculados en 256px
-     disponibles) y el padding lateral iba a 32px mientras .container iba a 20px. */
-  @media (max-width:560px){
-    .nav-inner{padding:12px 20px}          /* estaba en 32px mientras .container iba a 20px */
-    .nav-right .btn{font-size:11px;padding:0 14px}
-  }
+     disponibles) y el padding lateral iba a 32px mientras .container iba a 20px.
+     Redundante con la base mobile-first de abajo (361px+) — se absorbió ahí. */
 
   /* ═══════════════════════════════════════════════════════════════════════
      EL FORMULARIO, EN EL PRIMER VIEWPORT (móvil)
@@ -1288,70 +1545,65 @@
      Orden en móvil:  eyebrow · titular · subtítulo · FORMULARIO ·
                       sellos · estadísticas
   */
-  @media (max-width:1000px){
-    .hero-grid{display:flex;flex-direction:column;gap:0}
-    .hero-grid > div:first-of-type{display:contents}
+  /* Mobile-first: el orden móvil (eyebrow·titular·subtítulo·FORMULARIO·
+     sellos·estadísticas) y los recortes de espacio son ahora la BASE.
+     Escritorio (min-width:1001px) restaura el split de 2 columnas.
+     El truco de `display:contents` en la columna izquierda deja que sus
+     hijos entren en el mismo reparto de `order` que el formulario, su
+     hermano en el flex. Ver histórico de medición (~905px de scroll antes
+     del primer campo, 86% del tráfico es móvil) en el README. */
+  .hero-grid{display:flex;flex-direction:column;gap:0}
+  .hero-grid > div:first-of-type{display:contents}
+  .eyebrow    {order:1;font-size:10px;padding:6px 10px;margin-bottom:12px}
+  .hero-title {order:2}
+  .hero-sub   {order:3;margin-bottom:18px}
+  #formulario {order:4}
+  #lead-form  {order:5;margin-bottom:32px}
+  .trust-row  {order:6}
+  .hero-stats {order:7}
+  .hero-photo {order:8;aspect-ratio:3/4;max-width:340px;margin:28px auto 0}
+  .hero-ctas{display:none}
+  .hero{padding-top:24px!important}
+  .form-header{padding-bottom:14px;margin-bottom:14px}
+  .form-title{font-size:22px;line-height:1.15}
+  .form-sub{display:none}
+  .form-trust{display:none}
+  #particles{display:none!important}
+  .nav-inner{padding:10px 14px;gap:8px}
+  .logo-img{height:30px;width:auto}
+  .nav-right .btn{font-size:10px;padding:0 10px;letter-spacing:.02em}
 
-    .eyebrow    {order:1}
-    .hero-title {order:2}
-    .hero-sub   {order:3}
-    #formulario {order:4}
-    #lead-form  {order:5;margin-bottom:32px}
-    .trust-row  {order:6}
-    .hero-stats {order:7}
-
-    /* El CTA del hero se retira en móvil: es un ancla al formulario, y el
-       formulario ya está a la vista. Dejarlo costaba 52 px + margen justo
-       encima de lo que se quiere mostrar, y el sticky de abajo ya ofrece un
-       CTA permanente. En escritorio sigue igual. */
-    .hero-ctas{display:none}
-
-    /* Recortes para que el primer CAMPO entre, no solo el borde de la
-       tarjeta. Cada uno está medido, no elegido a ojo. */
-    .hero{padding-top:24px!important}
+  /* 361px+: ya entra el nav completo sin desbordar. */
+  @media (min-width:361px){
     .eyebrow{font-size:11px;padding:7px 12px;margin-bottom:14px}
-    .hero-title{font-size:30px;line-height:1.1;margin-bottom:14px}
-    .hero-sub{margin-bottom:18px}
-    .form-card{padding:20px 18px}
-    .form-header{padding-bottom:14px;margin-bottom:14px}
-    .form-title{font-size:22px;line-height:1.15}
-
-    /* El subtítulo del formulario repite lo que ya dice el badge que está dos
-       líneas encima ("Sin costo · Respuesta en 24 h hábiles"). Tres líneas de
-       texto redundante justo delante del primer campo. En escritorio se queda,
-       ahí sobra el espacio. */
-    .form-sub{display:none}
-
-    /* Los sellos del ticket 12 quedaban DUPLICADOS en móvil: una vez dentro
-       del formulario y otra en la .trust-row, que ahora va debajo. Ese ticket
-       era de escritorio — "certificaciones visibles sin scroll (desktop)",
-       porque a 1366 px la columna del hero cae bajo el pliegue— y en móvil el
-       problema no existe: la .trust-row aparece nada más pasar el formulario.
-       Se ocultan los del formulario, no los de abajo. */
-    .form-trust{display:none}
+    .nav-inner{padding:12px 20px;gap:normal}
+    .logo-img{height:44px;width:auto}
+    .nav-right .btn{font-size:11px;padding:0 14px;letter-spacing:normal}
   }
-
-  /* Pantallas de 360 px o menos. A 320 el nav desbordaba de verdad —medido:
-     el contenido pedía más ancho que el contenedor— y como `overflow-x:hidden`
-     lo esconde en vez de mostrarlo, se recortaba en silencio. */
-  @media (max-width:360px){
-    .nav-inner{padding:10px 14px;gap:8px}
-    .logo-img{height:30px;width:auto}
-    .nav-right .btn{font-size:10px;padding:0 10px;letter-spacing:.02em}
-    .eyebrow{font-size:10px;padding:6px 10px;margin-bottom:12px}
-    .hero-title{font-size:27px}
-    /* En 568 px de alto no cabe titular + subtítulo + primer campo por mucho
-       que se recorte. Se prioriza que el formulario asome —arranca a ~500 px
-       en vez de ~905— y el resto queda a un gesto de scroll. */
+  @media (min-width:561px){
+    .nav-inner{padding:14px 32px}
+    .nav-right .btn{font-size:13px;padding:0 18px}
+    .form-card{max-width:560px}
   }
-
-  /* Rendimiento en móvil: el canvas dibuja 38 nodos y hasta 703 comprobaciones
-     de distancia por frame mientras el usuario escribe. Con el INP de 1,8s ya
-     medido en el WebView de Facebook, es CPU que compite con el tecleo. */
-  @media (max-width:1000px){
-    #particles{display:none!important}
-    .orb{animation:none}
-    .form-card{backdrop-filter:none}   /* no difumina nada: la página es negra opaca */
+  @media (min-width:1001px){
+    .hero-grid{display:grid;flex-direction:row;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:28px}
+    .hero-grid > div:first-of-type{display:block}
+    .eyebrow    {order:0;padding:6px 14px;margin-bottom:24px}
+    .hero-title {order:0}
+    .hero-sub   {order:0;margin-bottom:32px}
+    #formulario {order:0}
+    #lead-form  {order:0;margin-bottom:0}
+    .trust-row  {order:0}
+    .hero-stats {order:0}
+    .hero-photo {order:0;aspect-ratio:3/4;max-width:none;align-self:start;margin:0}
+    .hero-ctas{display:flex}
+    .hero{padding-top:72px!important}
+    .form-card{padding:36px;max-width:none;margin:0;width:auto;backdrop-filter:blur(10px)}
+    .form-header{padding-bottom:22px;margin-bottom:22px}
+    .form-title{line-height:1.3}
+    .form-sub{display:block}
+    .form-trust{display:flex}
+    #particles{display:block!important}
   }
 </style>
 
@@ -1365,6 +1617,11 @@
     <a href="#" class="logo">
       <img src="/img/logo.png" alt="K2 Seguridad y Resguardo" class="logo-img" width="180" height="44" fetchpriority="high">
     </a>
+    <div class="nav-menu">
+      <a href="#servicios">Servicios</a>
+      <a href="#relacion-servicios">Cómo trabajamos</a>
+      <a href="#casos">Casos</a>
+    </div>
     <div class="nav-right">
       <a href="#formulario" class="btn btn-accent" data-cta="nav">Diagnóstico sin costo</a>
     </div>
@@ -1387,7 +1644,7 @@
            control por voz no podía activarlo y no se podía seleccionar el texto.
            El CTA explícito está tres líneas más abajo. -->
       <div class="eyebrow">Seguridad y resguardo para operaciones · Perú</div>
-      <h1 class="hero-title" id="hero-title">Resguardamos tu <em>operación minera</em> donde otros no llegan.</h1>
+      <h1 class="hero-title" id="hero-title">Garantiza continuidad operativa con <em>seguridad certificada 24/7</em></h1>
       <p class="hero-sub" id="hero-sub"><span class="hero-sub-mobile">Vigilancia armada y protección perimetral 24/7. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, ISO 9001/45001.</span><span class="hero-sub-full">Vigilancia armada, traslado de valores, resguardo de personal clave y protección perimetral 24/7 en los entornos más exigentes del Perú. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, protocolos ISO 9001 / 45001 y respuesta inmediata ante crisis.</span></p>
 
       <div class="hero-ctas">
@@ -1395,16 +1652,6 @@
           Diagnóstico sin costo en tu faena
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </a>
-      </div>
-
-      <div class="trust-row reveal reveal-delay-2">
-        <span class="trust-label">Certificados</span>
-        <div class="trust-badges">
-          <span class="trust-badge">ISO 9001</span>
-          <span class="trust-badge">ISO 45001</span>
-          <span class="trust-badge">BASC</span>
-          <span class="trust-badge">SUCAMEC</span>
-        </div>
       </div>
 
       <div class="hero-stats">
@@ -1427,38 +1674,46 @@
       </div>
     </div>
 
+    <!-- FOTO -->
+    <div class="hero-photo">
+      <img src="/img/hero-bg.jpg" alt="Agentes de seguridad K2 en interior de mina" loading="eager">
+    </div>
+
     <!-- FORM -->
     <span id="formulario" aria-hidden="true"></span>
     <form class="form-card" id="lead-form" novalidate aria-labelledby="form-title">
       <div class="form-progress" id="form-progress"></div>
       <div class="form-header">
-        <div class="form-badge">Sin costo · Respuesta en 24 h hábiles</div>
+        <div class="form-badge">Sin costo · Sin compromiso · Respuesta en 24 h hábiles</div>
         <h2 class="form-title" id="form-title">Solicita tu diagnóstico sin costo</h2>
         <p class="form-legend">Los campos con <span class="req" aria-hidden="true">*</span> son obligatorios.</p>
         <div class="form-sub">Un ejecutivo senior de operaciones mineras te llama en 24 h hábiles con un plan ajustado a tu faena.</div>
-        <!-- Sellos del PR #5 (ticket 12): en 1366px la columna del hero queda
-             por debajo del pliegue, así que aquí aparecen junto al formulario. -->
-        <div class="form-trust">
-          <span class="trust-badge">ISO 9001</span>
-          <span class="trust-badge">ISO 45001</span>
-          <span class="trust-badge">BASC</span>
-          <span class="trust-badge">SUCAMEC</span>
-        </div>
       </div>
 
       <div class="field">
-        <label class="field__label" for="intencion">¿Qué necesitas? <span class="req" aria-hidden="true">*</span><span class="sr-only">(obligatorio)</span></label>
+        <label class="field__label" for="intencion">¿Qué solución necesita su operación? <span class="req" aria-hidden="true">*</span><span class="sr-only">(obligatorio)</span></label>
         <select class="input" id="intencion" name="intencion" required>
-          <option value="" disabled selected>Selecciona…</option>
-          <option value="control_accesos">Control de accesos a unidad minera</option>
-          <option value="invasion">Recuperación de espacios invadidos</option>
-          <option value="consultoria">Estudio de riesgos de la operación</option>
-          <option value="monitoreo">Monitoreo, CCTV y central 24/7</option>
-          <option value="otro">Otro servicio de seguridad</option>
+          <option value="" disabled selected>Seleccione una opción</option>
+          <optgroup label="Seguridad especial">
+            <option value="recuperacion_espacios">Recuperación de espacios invadidos</option>
+            <option value="custodia_concentrado">Custodia de concentrado</option>
+            <option value="bloqueos_paralizaciones">Respuesta ante bloqueos o paralizaciones</option>
+          </optgroup>
+          <optgroup label="Consultoría y prevención">
+            <option value="estudio_riesgos">Estudio de riesgos de la operación</option>
+            <option value="diseno_protocolos">Diseño o actualización de protocolos</option>
+            <option value="homologacion">Homologación como proveedor minero</option>
+          </optgroup>
+          <optgroup label="Monitoreo y control">
+            <option value="control_accesos">Control de accesos en la unidad minera</option>
+            <option value="monitoreo_cctv">Monitoreo, CCTV y central 24/7</option>
+            <option value="drones">Supervisión con drones</option>
+          </optgroup>
+          <option value="otro">Otra necesidad de seguridad</option>
         </select>
         <div class="field__error">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Selecciona una opción.
+          Seleccione la solución que necesita.
         </div>
       </div>
 
@@ -1541,7 +1796,7 @@
         </div>
       </div>
 
-      <div class="field" style="display:none">
+      <div class="field">
         <label class="field__label" for="comentario">Comentario <span class="opt">(opcional)</span></label>
         <textarea class="textarea" id="comentario" name="comentario" rows="3" placeholder="Cuéntanos brevemente qué necesitas proteger..."></textarea>
       </div>
@@ -1591,37 +1846,108 @@
     </div>
 
     <div class="services-grid">
-      <a href="#formulario" class="svc" data-cta="servicio_especiales">
+      <div class="svc">
         <div class="svc-imgwrap">
-          <img src="/img/servicios/servicios-especiales.png" alt="Servicios especiales" loading="lazy">
+          <img src="/img/servicios/servicios-especiales.png" alt="Servicios de seguridad especiales" loading="lazy">
         </div>
         <div class="svc-body">
           <div class="svc-num">01 / ESPECIALES</div>
+          <div class="svc-eyebrow">Seguridad especializada</div>
           <h3>Servicios de seguridad especiales</h3>
-          <p class="svc-desc">Recuperación de espacios invadidos, custodia de concentrado y respuesta ante bloqueos y paralizaciones.</p>
+          <p class="svc-value">Respuesta especializada para recuperar el control, proteger activos y resguardar la continuidad de la operación.</p>
+          <ul class="svc-caps">
+            <li>Recuperación de espacios</li>
+            <li>Custodia de concentrado</li>
+            <li>Respuesta ante bloqueos</li>
+          </ul>
+          <p class="svc-resultado"><strong>Resultado:</strong> continuidad operativa protegida.</p>
+          <a href="#formulario" class="svc-cta-btn" data-cta="servicio_especiales">Consultar por seguridad especial</a>
         </div>
-      </a>
-      <a href="#formulario" class="svc" data-cta="servicio_consultoria">
+      </div>
+      <div class="svc">
         <div class="svc-imgwrap">
           <img src="/img/servicios/consultoria-riesgos.png" alt="Consultoría y prevención de riesgos" loading="lazy">
         </div>
         <div class="svc-body">
           <div class="svc-num">02 / CONSULTORÍA</div>
+          <div class="svc-eyebrow">Prevención y estrategia</div>
           <h3>Consultoría y prevención de riesgos</h3>
-          <p class="svc-desc">Estudio de riesgos de la unidad, protocolos alineados a ISO 45001 y homologación como proveedor minero.</p>
+          <p class="svc-value">Analizamos las vulnerabilidades de la unidad y diseñamos protocolos adaptados a su operación.</p>
+          <ul class="svc-caps">
+            <li>Estudios de riesgos</li>
+            <li>Diseño de protocolos</li>
+            <li>Acompañamiento para homologación</li>
+          </ul>
+          <p class="svc-resultado"><strong>Resultado:</strong> decisiones de seguridad mejor informadas.</p>
+          <a href="#formulario" class="svc-cta-btn" data-cta="servicio_consultoria">Solicitar un estudio de riesgos</a>
         </div>
-      </a>
-      <a href="#formulario" class="svc" data-cta="servicio_monitoreo">
+      </div>
+      <div class="svc">
         <div class="svc-imgwrap">
           <img src="/img/servicios/monitoreo-control.png" alt="Monitoreo y centro de control" loading="lazy">
         </div>
         <div class="svc-body">
           <div class="svc-num">03 / MONITOREO</div>
+          <div class="svc-eyebrow">Visibilidad operativa</div>
           <h3>Monitoreo y centro de control</h3>
-          <p class="svc-desc">CCTV y control de accesos en faena, drones para perímetro y relaveras, y central 24/7 con reporte a la superintendencia.</p>
+          <p class="svc-value">Conectamos CCTV, accesos, drones y una central 24/7 para mejorar la visibilidad y capacidad de respuesta.</p>
+          <ul class="svc-caps">
+            <li>CCTV y control de accesos</li>
+            <li>Drones para perímetros y relaveras</li>
+            <li>Reportes para la superintendencia</li>
+          </ul>
+          <p class="svc-resultado"><strong>Resultado:</strong> visibilidad permanente y coordinación oportuna.</p>
+          <a href="#formulario" class="svc-cta-btn" data-cta="servicio_monitoreo">Conocer la solución de monitoreo</a>
         </div>
-      </a>
+      </div>
     </div>
+  </div>
+</section>
+
+<!-- RELACIÓN ENTRE LOS SERVICIOS -->
+<section id="relacion-servicios" class="wfh">
+  <div class="container wfh-grid">
+    <div class="wfh-copy">
+      <span class="wfh-eyebrow">Cómo trabajamos</span>
+      <h2 class="wfh-title">Tres capacidades.<br><em>Una estrategia de seguridad.</em></h2>
+      <p class="wfh-subtitle">Consultoría, monitoreo y respuesta especializada para proteger tu operación minera de principio a fin.</p>
+      <div class="wfh-badges">
+        <div class="wfh-badge">
+          <span class="wfh-badge-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span class="wfh-badge-text"><strong>24/7</strong> Operación activa</span>
+        </div>
+        <div class="wfh-badge">
+          <span class="wfh-badge-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.3L21 9l-5 4.6L17.4 21 12 17.3 6.6 21 8 13.6 3 9l6.1-.7z"/></svg></span>
+          <span class="wfh-badge-text"><strong>+15</strong> Años de experiencia</span>
+        </div>
+        <div class="wfh-badge">
+          <span class="wfh-badge-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/></svg></span>
+          <span class="wfh-badge-text"><strong>K2 Seguridad</strong> Resguardo especializado</span>
+        </div>
+        <div class="wfh-badge">
+          <span class="wfh-badge-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span class="wfh-badge-text"><strong>&lt; 24 h</strong> Tiempo de respuesta</span>
+        </div>
+        <div class="wfh-badge">
+          <span class="wfh-badge-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <span class="wfh-badge-text"><strong>SUCAMEC</strong> Personal acreditado</span>
+        </div>
+      </div>
+      <span class="wfh-tag">Seguridad especializada</span>
+    </div>
+
+    <div class="wfh-media">
+      <div class="wfh-imgwrap">
+        <!-- Placeholder temporal: reemplazar por el PNG del agente de seguridad -->
+        <img src="/img/servicios/servicios-especiales.png" alt="Agente de seguridad K2">
+      </div>
+    </div>
+  </div>
+
+  <div class="container wfh-bottom">
+    <p class="wfh-tagline">Preventivo. Coordinado. <em>Efectivo.</em></p>
+    <p class="wfh-closing">K2 integra conocimiento del riesgo, visibilidad operativa y capacidad de respuesta para proteger la continuidad de cada unidad minera.</p>
+    <p class="wfh-trust">Confiado por operaciones mineras en todo el Perú</p>
   </div>
 </section>
 
@@ -1635,29 +1961,66 @@
     </div>
     <div class="reasons-grid">
       <div class="reason">
+        <div class="reason-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/></svg></div>
         <div class="reason-n">01</div>
         <h3>Equipo de élite</h3>
         <p>Personal entrenado en vigilancia, seguridad y resguardo bajo estándares internacionales.</p>
       </div>
       <div class="reason">
+        <div class="reason-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
         <div class="reason-n">02</div>
         <h3>Respuesta inmediata</h3>
         <p>Preparados para actuar ante cualquier evento de seguridad, en cualquier momento.</p>
       </div>
       <div class="reason">
+        <div class="reason-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
         <div class="reason-n">03</div>
         <h3>Soluciones a medida</h3>
         <p>Nos adaptamos a cada rubro: minería, logística, industria, salud.</p>
       </div>
       <div class="reason">
+        <div class="reason-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
         <div class="reason-n">04</div>
         <h3>Tecnología avanzada</h3>
         <p>Innovación aplicada al terreno con monitoreo y control centralizado.</p>
       </div>
       <div class="reason">
+        <div class="reason-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div class="reason-n">05</div>
         <h3>Cercanía humana</h3>
         <p>Acompañamiento directo del equipo comercial y operativo, sin intermediarios.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFERENCIALES: CONTINUIDAD Y RESPUESTA -->
+<section id="diferenciales">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-pre">Lo que marca la diferencia</span>
+      <h2>Continuidad de equipo. <em>Respuesta inmediata.</em></h2>
+    </div>
+    <div class="diff-grid">
+      <div class="diff-col">
+        <div class="diff-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></div>
+        <span class="diff-eyebrow">Continuidad del equipo</span>
+        <h3>La rotación de seguridad también es un <em>riesgo operacional</em>.</h3>
+        <p class="diff-text">Cuando el personal cambia con frecuencia, la operación vuelve a empezar: nueva inducción, curva de aprendizaje, menor conocimiento de protocolos e instalaciones.</p>
+        <div class="diff-stat">
+          <span class="diff-stat-label">Rotación</span>
+          <p class="diff-stat-value">Por debajo del <em>promedio del mercado</em></p>
+        </div>
+      </div>
+      <div class="diff-col">
+        <div class="diff-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg></div>
+        <span class="diff-eyebrow">Respuesta coordinada</span>
+        <h3>Anticipar un riesgo no sirve si <em>nadie puede actuar a tiempo</em>.</h3>
+        <p class="diff-text">Estructura corta e interlocutor directo: quien decide y quien ejecuta ya están coordinados, sin trámites intermedios.</p>
+        <div class="diff-stat">
+          <span class="diff-stat-label">Respuesta K2</span>
+          <p class="diff-stat-value"><em>&lt; 24 h</em> a tu consulta</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1672,46 +2035,90 @@
       <h2>Certificaciones</h2>
       <p class="section-lead" style="margin-left:auto;margin-right:auto;">Los más altos estándares internacionales en gestión de calidad, seguridad ocupacional, ambiental y compliance.</p>
     </div>
-    <div class="certs-grid">
-      <div class="cert">
-        <div class="cert-logo"><img src="/img/certificaciones/iso-9001.png" alt="ISO 9001" loading="lazy"></div>
-        <div class="cert-name">ISO 9001</div>
-        <div class="cert-desc">Sistema de Gestión de Calidad</div>
-      </div>
-      <div class="cert">
-        <div class="cert-logo"><img src="/img/certificaciones/iso-14001.png" alt="ISO 14001" loading="lazy"></div>
-        <div class="cert-name">ISO 14001</div>
-        <div class="cert-desc">Sistema de Gestión Ambiental</div>
-      </div>
-      <div class="cert">
-        <div class="cert-logo"><img src="/img/certificaciones/iso-45001.png" alt="ISO 45001" loading="lazy"></div>
-        <div class="cert-name">ISO 45001</div>
-        <div class="cert-desc">Seguridad y Salud Ocupacional</div>
-      </div>
-      <div class="cert">
-        <div class="cert-logo"><img src="/img/certificaciones/iso-37001.jpg" alt="ISO 37001" loading="lazy"></div>
-        <div class="cert-name">ISO 37001</div>
-        <div class="cert-desc">Sistema de Gestión Antisoborno</div>
-      </div>
-      <div class="cert">
-        <div class="cert-logo"><img src="/img/certificaciones/iqnet.png" alt="IQNet" loading="lazy"></div>
-        <div class="cert-name">IQNet</div>
-        <div class="cert-desc">Red Internacional de Certificación</div>
-      </div>
-      <div class="cert">
-        <div class="cert-logo"><img src="/img/certificaciones/basc.png" alt="BASC" loading="lazy"></div>
-        <div class="cert-name">BASC</div>
-        <div class="cert-desc">Alianza para el Comercio Seguro</div>
-      </div>
-      <div class="cert">
-        <div class="cert-logo"><img src="/img/certificaciones/dgac.png" alt="DGAC" loading="lazy"></div>
-        <div class="cert-name">DGAC</div>
-        <div class="cert-desc">Dirección General de Aeronáutica Civil</div>
-      </div>
-      <div class="cert">
-        <div class="cert-logo"><img src="/img/certificaciones/sucamec-logo.jpg" alt="SUCAMEC" loading="lazy"></div>
-        <div class="cert-name">SUCAMEC</div>
-        <div class="cert-desc">Autorización para manejo de armas</div>
+    <div class="certs-marquee">
+      <div class="certs-marquee-track" id="certs-track">
+        <div class="cert">
+          <div class="cert-logo"><img src="/img/certificaciones/iso-9001.png" alt="ISO 9001" loading="lazy"></div>
+          <div class="cert-name">ISO 9001</div>
+          <div class="cert-desc">Sistema de Gestión de Calidad</div>
+        </div>
+        <div class="cert">
+          <div class="cert-logo"><img src="/img/certificaciones/iso-14001.png" alt="ISO 14001" loading="lazy"></div>
+          <div class="cert-name">ISO 14001</div>
+          <div class="cert-desc">Sistema de Gestión Ambiental</div>
+        </div>
+        <div class="cert">
+          <div class="cert-logo"><img src="/img/certificaciones/iso-45001.png" alt="ISO 45001" loading="lazy"></div>
+          <div class="cert-name">ISO 45001</div>
+          <div class="cert-desc">Seguridad y Salud Ocupacional</div>
+        </div>
+        <div class="cert">
+          <div class="cert-logo"><img src="/img/certificaciones/iso-37001.jpg" alt="ISO 37001" loading="lazy"></div>
+          <div class="cert-name">ISO 37001</div>
+          <div class="cert-desc">Sistema de Gestión Antisoborno</div>
+        </div>
+        <div class="cert">
+          <div class="cert-logo"><img src="/img/certificaciones/iqnet.png" alt="IQNet" loading="lazy"></div>
+          <div class="cert-name">IQNet</div>
+          <div class="cert-desc">Red Internacional de Certificación</div>
+        </div>
+        <div class="cert">
+          <div class="cert-logo"><img src="/img/certificaciones/basc.png" alt="BASC" loading="lazy"></div>
+          <div class="cert-name">BASC</div>
+          <div class="cert-desc">Alianza para el Comercio Seguro</div>
+        </div>
+        <div class="cert">
+          <div class="cert-logo"><img src="/img/certificaciones/dgac.png" alt="DGAC" loading="lazy"></div>
+          <div class="cert-name">DGAC</div>
+          <div class="cert-desc">Dirección General de Aeronáutica Civil</div>
+        </div>
+        <div class="cert">
+          <div class="cert-logo"><img src="/img/certificaciones/sucamec-logo.jpg" alt="SUCAMEC" loading="lazy"></div>
+          <div class="cert-name">SUCAMEC</div>
+          <div class="cert-desc">Autorización para manejo de armas</div>
+        </div>
+        <!-- Copia duplicada para el loop continuo sin corte (translateX -50%).
+             Oculta de lectores de pantalla para no anunciar las 8 certificaciones dos veces. -->
+        <div class="cert" aria-hidden="true">
+          <div class="cert-logo"><img src="/img/certificaciones/iso-9001.png" alt="" loading="lazy"></div>
+          <div class="cert-name">ISO 9001</div>
+          <div class="cert-desc">Sistema de Gestión de Calidad</div>
+        </div>
+        <div class="cert" aria-hidden="true">
+          <div class="cert-logo"><img src="/img/certificaciones/iso-14001.png" alt="" loading="lazy"></div>
+          <div class="cert-name">ISO 14001</div>
+          <div class="cert-desc">Sistema de Gestión Ambiental</div>
+        </div>
+        <div class="cert" aria-hidden="true">
+          <div class="cert-logo"><img src="/img/certificaciones/iso-45001.png" alt="" loading="lazy"></div>
+          <div class="cert-name">ISO 45001</div>
+          <div class="cert-desc">Seguridad y Salud Ocupacional</div>
+        </div>
+        <div class="cert" aria-hidden="true">
+          <div class="cert-logo"><img src="/img/certificaciones/iso-37001.jpg" alt="" loading="lazy"></div>
+          <div class="cert-name">ISO 37001</div>
+          <div class="cert-desc">Sistema de Gestión Antisoborno</div>
+        </div>
+        <div class="cert" aria-hidden="true">
+          <div class="cert-logo"><img src="/img/certificaciones/iqnet.png" alt="" loading="lazy"></div>
+          <div class="cert-name">IQNet</div>
+          <div class="cert-desc">Red Internacional de Certificación</div>
+        </div>
+        <div class="cert" aria-hidden="true">
+          <div class="cert-logo"><img src="/img/certificaciones/basc.png" alt="" loading="lazy"></div>
+          <div class="cert-name">BASC</div>
+          <div class="cert-desc">Alianza para el Comercio Seguro</div>
+        </div>
+        <div class="cert" aria-hidden="true">
+          <div class="cert-logo"><img src="/img/certificaciones/dgac.png" alt="" loading="lazy"></div>
+          <div class="cert-name">DGAC</div>
+          <div class="cert-desc">Dirección General de Aeronáutica Civil</div>
+        </div>
+        <div class="cert" aria-hidden="true">
+          <div class="cert-logo"><img src="/img/certificaciones/sucamec-logo.jpg" alt="" loading="lazy"></div>
+          <div class="cert-name">SUCAMEC</div>
+          <div class="cert-desc">Autorización para manejo de armas</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1732,18 +2139,99 @@
       </button>
       <div class="carousel-stage" id="carousel-stage" role="region" aria-label="Empresas mineras que confían en K2">
         <div class="carousel-stage-inner">
-          <div class="client-logo"><img src="/img/clientes/hochschild.png" alt="Hochschild Mining" loading="lazy"></div>
-          <div class="client-logo"><img src="/img/clientes/minera-santa-luisa.jpg" alt="Minera Santa Luisa" loading="lazy"></div>
-          <div class="client-logo"><img src="/img/clientes/consorcio-minero-horizonte.png" alt="Consorcio Minero Horizonte" loading="lazy"></div>
-          <div class="client-logo"><img src="/img/clientes/cori-puno.png" alt="Cori Puno" loading="lazy"></div>
-          <div class="client-logo"><img src="/img/clientes/zafranal.png" alt="Zafranal" loading="lazy"></div>
-          <div class="client-logo"><img src="/img/clientes/fortuna-silver-mines.png" alt="Fortuna Silver Mines" loading="lazy"></div>
-          <div class="client-logo"><img src="/img/clientes/consorcio-minero-sunec.png" alt="Consorcio Minero Sunec" loading="lazy"></div>
+          <div class="client-logo"><img src="/img/clientes/hochschild.png" alt="Hochschild Mining"></div>
+          <div class="client-logo"><img src="/img/clientes/minera-santa-luisa.jpg" alt="Minera Santa Luisa"></div>
+          <div class="client-logo"><img src="/img/clientes/consorcio-minero-horizonte.png" alt="Consorcio Minero Horizonte"></div>
+          <div class="client-logo"><img src="/img/clientes/cori-puno.png" alt="Cori Puno"></div>
+          <div class="client-logo"><img src="/img/clientes/zafranal.png" alt="Zafranal"></div>
+          <div class="client-logo"><img src="/img/clientes/fortuna-silver-mines.png" alt="Fortuna Silver Mines"></div>
+          <div class="client-logo"><img src="/img/clientes/consorcio-minero-sunec.png" alt="Consorcio Minero Sunec"></div>
         </div>
       </div>
       <button type="button" class="carousel-arrow" id="carousel-next" aria-label="Siguiente cliente">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
+    </div>
+  </div>
+</section>
+
+<!-- CASOS / EXPERIENCIA -->
+<section class="casos-section" id="casos">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-pre">Experiencia comprobada</span>
+      <h2>Casos de éxito en operaciones críticas</h2>
+    </div>
+
+    <div class="casos-grid">
+      <!-- CASO 1: Minería -->
+      <div class="caso-card reveal">
+        <div class="caso-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v16H6z"/><path d="M10 8h4M10 12h4M10 16h4"/></svg>
+        </div>
+        <div class="caso-sector">Operación minera subterránea</div>
+        <h3 class="caso-title">Riesgo alto controlado</h3>
+
+        <div class="caso-item">
+          <div class="caso-item-label">Problema</div>
+          <div class="caso-item-text">Riesgo de paros operativos por incidentes de seguridad. Personal expuesto en socavones sin protocolo especializado.</div>
+        </div>
+
+        <div class="caso-item">
+          <div class="caso-item-label">Solución</div>
+          <div class="caso-item-text">Protocolo especializado para minería subterránea. Vigilancia 24/7 + coordinación con órganos de Defensa. Capacitación en procedimientos de emergencia.</div>
+        </div>
+
+        <div class="caso-resultado">
+          <div class="caso-resultado-text">✓ 0 paros por incidentes de seguridad en 18 meses. Cumplimiento 100% en auditorías Ley 29783.</div>
+        </div>
+      </div>
+
+      <!-- CASO 2: Logística -->
+      <div class="caso-card reveal">
+        <div class="caso-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="12" rx="1"/><path d="M6 7V4M18 7V4"/></svg>
+        </div>
+        <div class="caso-sector">Logística y distribución</div>
+        <h3 class="caso-title">Pérdidas contenidas</h3>
+
+        <div class="caso-item">
+          <div class="caso-item-label">Problema</div>
+          <div class="caso-item-text">Robos recurrentes en horarios nocturnos. Falta de trazabilidad en zonas de almacenamiento de alto valor.</div>
+        </div>
+
+        <div class="caso-item">
+          <div class="caso-item-label">Solución</div>
+          <div class="caso-item-text">Monitoreo CCTV especializado + patrullaje perimetral + sistema de alertas en tiempo real. Integración con central de control 24/7.</div>
+        </div>
+
+        <div class="caso-resultado">
+          <div class="caso-resultado-text">✓ Reducción de pérdidas en 85%. Implementación completada en 3 semanas.</div>
+        </div>
+      </div>
+
+      <!-- CASO 3: Industria -->
+      <div class="caso-card reveal">
+        <div class="caso-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="caso-sector">Manufactura industrial</div>
+        <h3 class="caso-title">Cumplimiento normativo</h3>
+
+        <div class="caso-item">
+          <div class="caso-item-label">Problema</div>
+          <div class="caso-item-text">Hallazgos en inspección de SST. Controles de acceso deficientes. No conformidades en protocolos de seguridad.</div>
+        </div>
+
+        <div class="caso-item">
+          <div class="caso-item-label">Solución</div>
+          <div class="caso-item-text">Auditoría de diagnóstico + capacitación de equipos + implementación de estándares K2 en seguridad perimetral y control de acceso.</div>
+        </div>
+
+        <div class="caso-resultado">
+          <div class="caso-resultado-text">✓ Certificación de cumplimiento normativo. Cero hallazgos en inspección posterior.</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1756,7 +2244,7 @@
       <p>Un ejecutivo de operaciones mineras analiza los riesgos de tu unidad y te llama en 24 h hábiles. Sin costo y sin compromiso.</p>
     </div>
     <a href="#formulario" class="cta-btn-big" data-cta="cta_final">
-      Solicitar mi diagnóstico sin costo
+      Cotiza ahora sin costo
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </a>
   </div>
@@ -1843,6 +2331,40 @@
       fbclid: p.get('fbclid') || '',
       gclid:  p.get('gclid')  || '',
     };
+  }
+
+  // ====== SOLUCIÓN → CATEGORÍA INTERNA (para enrutar el lead en el CRM) ======
+  // No se muestra al usuario: solo viaja en el payload de /crm-intake para
+  // que el equipo sepa a qué línea de servicio corresponde sin tener que
+  // releer el campo de texto libre.
+  const K2_CATEGORIA_POR_SOLUCION = {
+    recuperacion_espacios: 'Especiales',
+    custodia_concentrado: 'Especiales',
+    bloqueos_paralizaciones: 'Especiales',
+    estudio_riesgos: 'Consultoria',
+    diseno_protocolos: 'Consultoria',
+    homologacion: 'Consultoria',
+    control_accesos: 'Monitoreo',
+    monitoreo_cctv: 'Monitoreo',
+    drones: 'Monitoreo',
+    otro: 'Otros',
+  };
+  function k2Categoria(valorIntencion){
+    return K2_CATEGORIA_POR_SOLUCION[valorIntencion] || 'Otros';
+  }
+
+  // Pregunta del campo "Comentario" adaptada a la categoría elegida, para que
+  // el prospecto sepa qué contar sin tener que adivinarlo.
+  const K2_PLACEHOLDER_COMENTARIO = {
+    Especiales: 'Cuéntenos brevemente qué situación necesita atender.',
+    Consultoria: '¿Qué unidad, proceso o riesgo desea evaluar?',
+    Monitoreo: '¿Qué zonas o activos necesita supervisar?',
+    Otros: 'Cuéntanos brevemente qué necesitas proteger...',
+  };
+  function k2ActualizarComentario(valorIntencion){
+    var comentario = document.getElementById('comentario');
+    if(!comentario) return;
+    comentario.placeholder = K2_PLACEHOLDER_COMENTARIO[k2Categoria(valorIntencion)];
   }
 
   // ====== FORM ABANDONMENT TRACKING ======
@@ -2093,6 +2615,7 @@
       el.addEventListener('change', () => {
         el.closest('.field').dataset.touched = '1';
         validate(false);
+        if(id === 'intencion') k2ActualizarComentario(el.value);
       });
     }
   });
@@ -2138,6 +2661,10 @@
     const utms = getUtms();
     const payload = {
       intencion: document.getElementById('intencion').value,
+      // Clasificación interna: no se muestra al usuario, solo enruta el lead
+      // en el CRM sin que alguien tenga que releer el texto libre.
+      categoria_interna: k2Categoria(document.getElementById('intencion').value),
+      registrado_en: new Date().toISOString(),
       nombre: document.getElementById('nombre').value.trim(),
       telefono: document.getElementById('telefono').value.replace(/^\+?51/, '').replace(/[\s\-\(\)]/g, '').trim(),
       ruc: document.getElementById('ruc').value.trim(),
@@ -2272,15 +2799,16 @@
       var cta = a.getAttribute('data-cta') || '';
       if(cta.indexOf('servicio_') === 0){
         var mapa = {
-          servicio_especiales: 'invasion',
-          servicio_consultoria: 'consultoria',
-          servicio_monitoreo: 'monitoreo'
+          servicio_especiales: 'recuperacion_espacios',
+          servicio_consultoria: 'estudio_riesgos',
+          servicio_monitoreo: 'monitoreo_cctv'
         };
         var sel = document.getElementById('intencion');
         if(sel && mapa[cta]){
           sel.value = mapa[cta];
           sel.closest('.field').dataset.touched = '1';
           validate(false);
+          k2ActualizarComentario(sel.value);
         }
       }
       const target = document.getElementById('lead-form');
@@ -2342,7 +2870,11 @@
 
     function tick(ts){
       if(lastTs == null) lastTs = ts;
-      const dt = ts - lastTs;
+      // Si un frame tarda de más (pestaña en segundo plano, jank del canvas de
+      // partículas del hero, etc.) el siguiente dt puede ser enorme y el
+      // carrusel "salta" en vez de avanzar suave. Se acota a 50ms (~3 frames)
+      // para que en ese caso simplemente pierda un poco de tiempo, nunca un salto.
+      const dt = Math.min(ts - lastTs, 50);
       lastTs = ts;
       if(!paused){
         position = (position + SPEED * dt) % total;
@@ -2374,6 +2906,10 @@
     document.getElementById('carousel-next')?.addEventListener('click', () => step(1));
 
     window.addEventListener('resize', layout);
+    // Al volver de otra pestaña, lastTs quedaría con un valor muy viejo:
+    // se limpia para que el próximo frame arranque el conteo desde cero
+    // en vez de generar un dt enorme (ver comentario en tick()).
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) lastTs = null; });
   })();
 
   // ---------- SCROLL REVEAL ----------
