@@ -226,16 +226,16 @@
   }
   .hero-bgimg{
     position:absolute;inset:0;z-index:0;pointer-events:none;
-    background-image:url('/img/hero-bg.jpg');
-    background-size:cover;background-position:center 30%;
-    opacity:.14;
-    mix-blend-mode:luminosity;
-    mask-image:linear-gradient(90deg, transparent 0%, black 20%, black 80%, transparent 100%);
-    -webkit-mask-image:linear-gradient(90deg, transparent 0%, black 20%, black 80%, transparent 100%);
+    background-image:url('/img/hero-bg-mineria.jpg');
+    background-size:cover;background-position:center;
+    opacity:.35;
+    mix-blend-mode:normal;
+    mask-image:linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image:linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
   }
   .hero-bgimg::after{
     content:"";position:absolute;inset:0;
-    background:linear-gradient(180deg, rgba(5,15,26,.45) 0%, rgba(5,15,26,.82) 100%);
+    background:linear-gradient(180deg, rgba(5,15,26,.5) 0%, rgba(5,15,26,.75) 100%);
   }
   /* Panel de foto: instancia nítida (a diferencia de .hero-bgimg, que es una
      textura de fondo muy tenue). Vive como columna propia en el hero-grid.
@@ -412,22 +412,19 @@
 
   /* ---------- FORM CARD ---------- */
   .form-card{
-    background-image:url('/img/hero-bg-mineria.jpg');
-    background-size:cover;
-    background-position:center;
+    background:transparent;
     color:var(--white);
     padding:20px 18px;position:relative;
     max-width:100%;margin:0 auto 32px;width:100%;
     border-radius:10px;
-    border:1px solid var(--k2-border-strong);
+    border:1px solid rgba(0,244,237,.2);
     box-shadow:
-      0 30px 80px -20px rgba(0,0,0,.9),
-      0 0 60px rgba(0,244,237,.12),
+      0 0 40px rgba(0,244,237,.1),
       inset 0 1px 0 rgba(255,255,255,.05);
   }
   .form-card::before{
     content:"";position:absolute;inset:0;
-    background:linear-gradient(135deg, rgba(5,15,26,.35) 0%, rgba(10,20,35,.45) 100%);
+    background:linear-gradient(135deg, rgba(5,15,26,.4) 0%, rgba(10,20,35,.5) 100%);
     border-radius:10px;
     z-index:1;
   }
