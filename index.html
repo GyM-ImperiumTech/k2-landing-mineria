@@ -476,6 +476,23 @@
     color:var(--white);
   }
   .form-sub{font-size:13px;color:var(--k2-text-muted);margin-top:8px;line-height:1.6;font-weight:300}
+
+  /* Aviso de empleo. La opción "Busco trabajo en K2" que vive dentro del
+     <select> tuvo 2 eventos y 1 usuario en 28 días (GA4, `desvio_postulante`),
+     y ese único usuario fue una prueba propia del 09-sep: en producción no la
+     eligió nadie. Está al final de una lista de siete servicios y la persona
+     elige antes de llegar. Este aviso se lee ANTES de abrir el desplegable, que
+     es donde se decide. Queda deliberadamente discreto: no compite con el CTA
+     comercial, solo tiene que estar ahí para quien lo busca. */
+  .form-empleo{
+    font-size:12.5px;color:var(--k2-text-muted);line-height:1.5;
+    margin:12px 0 0;padding-top:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+  }
+  .form-empleo a{
+    color:var(--k2-primary);text-decoration:underline;
+    text-underline-offset:2px;white-space:nowrap;
+  }
   /* Ticket 12: certificaciones visibles sin scroll — mismo componente .trust-badge
      del hero, en versión compacta dentro del form-header, para que aparezcan en
      el primer viewport junto con el formulario (no solo en la columna del hero,
@@ -1493,6 +1510,12 @@
         <h2 class="form-title" id="form-title">Solicita tu diagnóstico sin costo</h2>
         <p class="form-legend">Los campos con <span class="req" aria-hidden="true">*</span> son obligatorios.</p>
         <div class="form-sub">Un ejecutivo senior de operaciones mineras te llama en 24 h hábiles con un plan ajustado a tu faena.</div>
+        <p class="form-empleo">
+          Este formulario es para empresas que necesitan seguridad.
+          ¿Buscas trabajo en K2? <a id="empleo-aviso"
+            href="https://postula.k2.com.pe/?utm_source=mineria&amp;utm_medium=aviso&amp;utm_campaign=desvio_postulante"
+            target="_blank" rel="noopener">Ver convocatorias →</a>
+        </p>
         <!-- Sellos del PR #5 (ticket 12): en 1366px la columna del hero queda
              por debajo del pliegue, así que aquí aparecen junto al formulario. -->
         <div class="form-trust">
@@ -1946,15 +1969,36 @@
   applyTweaks(TWEAK_DEFAULTS);
 
   // ====== UTMs ======
+  // El CTA del observatorio manda `?via=observatorio&via_cta=<id>`. GA4 ya lo
+  // recibia como dimension (bloque cfgGa4 arriba, que ademas lo persiste en
+  // sessionStorage porque gracias.html ya no lo trae en la URL), pero al CRM no
+  // llegaba nada: un lead que venia del observatorio entraba como si hubiera
+  // llegado solo, y la etapa 2 del embudo quedaba sin atribuir.
+  //
+  // Se rellenan los UTM SOLO si no hay ninguno real. Una campana con UTM propio
+  // siempre manda: `via` es el origen interno, no una campana.
   function getUtms(){
     const p = new URLSearchParams(window.location.search);
-    return {
+    const ss = k => { try { return sessionStorage.getItem(k) || ''; } catch(e){ return ''; } };
+    const u = {
       utm_source: p.get('utm_source') || '',
       utm_medium: p.get('utm_medium') || '',
       utm_campaign: p.get('utm_campaign') || '',
       utm_term: p.get('utm_term') || '',
       utm_content: p.get('utm_content') || '',
     };
+    if (!u.utm_source) {
+      const via = p.get('via') || ss('k2_via');
+      if (via) {
+        u.utm_source   = via.toUpperCase();
+        u.utm_medium   = 'interno';
+        u.utm_campaign = 'via_' + via;
+        // Que CTA del observatorio lo trajo: sirve para saber que parte del
+        // contenido empuja, no solo que el observatorio empuja.
+        if (!u.utm_content) u.utm_content = p.get('via_cta') || ss('k2_via_cta');
+      }
+    }
+    return u;
   }
 
 
@@ -2474,8 +2518,16 @@
       }
     });
 
+    // `origen` separa las dos puertas al portal de postulaciones, porque miden
+    // cosas distintas: `desvio_select` es quien ya estaba llenando el formulario
+    // y declaró que busca trabajo; `aviso_header` es quien lo vio antes de
+    // empezar. Si el aviso funciona, el segundo debería crecer y el primero
+    // bajar — y los leads postulantes del CRM, también.
     document.getElementById('empleo-cta')?.addEventListener('click', function(){
-      if (typeof gtag === 'function') gtag('event','internal_hop',{destino:'postula.k2.com.pe'});
+      if (typeof gtag === 'function') gtag('event','internal_hop',{destino:'postula.k2.com.pe', origen:'desvio_select'});
+    });
+    document.getElementById('empleo-aviso')?.addEventListener('click', function(){
+      if (typeof gtag === 'function') gtag('event','internal_hop',{destino:'postula.k2.com.pe', origen:'aviso_header'});
     });
   })();
 
