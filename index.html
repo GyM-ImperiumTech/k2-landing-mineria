@@ -1969,15 +1969,36 @@
   applyTweaks(TWEAK_DEFAULTS);
 
   // ====== UTMs ======
+  // El CTA del observatorio manda `?via=observatorio&via_cta=<id>`. GA4 ya lo
+  // recibia como dimension (bloque cfgGa4 arriba, que ademas lo persiste en
+  // sessionStorage porque gracias.html ya no lo trae en la URL), pero al CRM no
+  // llegaba nada: un lead que venia del observatorio entraba como si hubiera
+  // llegado solo, y la etapa 2 del embudo quedaba sin atribuir.
+  //
+  // Se rellenan los UTM SOLO si no hay ninguno real. Una campana con UTM propio
+  // siempre manda: `via` es el origen interno, no una campana.
   function getUtms(){
     const p = new URLSearchParams(window.location.search);
-    return {
+    const ss = k => { try { return sessionStorage.getItem(k) || ''; } catch(e){ return ''; } };
+    const u = {
       utm_source: p.get('utm_source') || '',
       utm_medium: p.get('utm_medium') || '',
       utm_campaign: p.get('utm_campaign') || '',
       utm_term: p.get('utm_term') || '',
       utm_content: p.get('utm_content') || '',
     };
+    if (!u.utm_source) {
+      const via = p.get('via') || ss('k2_via');
+      if (via) {
+        u.utm_source   = via.toUpperCase();
+        u.utm_medium   = 'interno';
+        u.utm_campaign = 'via_' + via;
+        // Que CTA del observatorio lo trajo: sirve para saber que parte del
+        // contenido empuja, no solo que el observatorio empuja.
+        if (!u.utm_content) u.utm_content = p.get('via_cta') || ss('k2_via_cta');
+      }
+    }
+    return u;
   }
 
 
