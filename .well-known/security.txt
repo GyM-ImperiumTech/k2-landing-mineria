@@ -1,0 +1,4 @@
+Contact: mailto:lchumioque@grupohng.com
+Expires: 2027-09-09T00:00:00Z
+Preferred-Languages: es
+Canonical: https://mineria.k2.com.pe/.well-known/security.txt
