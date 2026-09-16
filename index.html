@@ -1443,7 +1443,8 @@
 <nav class="nav">
   <div class="nav-inner">
     <!-- El logo NO es un enlace, y es a proposito. Era `<a href="#">`: un enlace
-         de 180x44 px sin destino, clavado en la esquina superior izquierda de cada
+         de 102x44 px renderizados (el atributo dice 180, pero el CSS manda
+         `height:44px` con ancho automatico sobre una imagen de 204x88) sin destino, clavado en la esquina superior izquierda de cada
          pantalla porque el nav es `position:sticky`. Medido el 16-sep-2026 en los
          Website actions del Insight Tag contra el access.log: **~900 clics en 30
          dias sobre 1.574 visitantes unicos, el 57 %** — mas que todos los CTAs
