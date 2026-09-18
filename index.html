@@ -2599,62 +2599,56 @@
     els.forEach(el => io.observe(el));
   })();
 
-  // ---------- PARALLAX: decorativo puro, diferido ----------
-  // No aporta nada al primer render ni al formulario, y a diferencia del
-  // reveal no oculta/muestra nada -- solo mueve elementos ya visibles con
-  // transform, así que diferirlo no genera CLS. Corre tras 'load' con un
-  // setTimeout(0) para no extender ese evento. No toca el bloque GA4
-  // TRACKING de más abajo ni el gtag del <head>.
-  function k2BootDecorativos(){
-    (function(){
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // ---------- PARALLAX: glows y orbes siguen al scroll/mouse ----------
+  // Se probó diferir esto hasta después de 'load' (18-sep-2026) para bajar
+  // el TBT, pero el updateParallax() inicial le pone un transform a los
+  // section-glow recién en ese momento -- el salto de "sin transform" a
+  // "con transform" en un elemento ya pintado también cuenta como CLS
+  // (subió a 0.135 igual que con el reveal diferido). Vuelve a correr
+  // inmediato, como en el original.
+  (function(){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      // Mouse parallax en hero (orbes)
-      const hero = document.querySelector('.hero');
-      const orbs = document.querySelectorAll('.orb');
-      if(hero && orbs.length){
-        hero.addEventListener('mousemove', (e) => {
-          const r = hero.getBoundingClientRect();
-          const x = (e.clientX - r.left) / r.width - .5;
-          const y = (e.clientY - r.top) / r.height - .5;
-          orbs.forEach((orb, i) => {
-            const depth = (i + 1) * 12;
-            orb.style.transform = `translate(${x * depth}px, ${y * depth}px)`;
-          });
+    // Mouse parallax en hero (orbes)
+    const hero = document.querySelector('.hero');
+    const orbs = document.querySelectorAll('.orb');
+    if(hero && orbs.length){
+      hero.addEventListener('mousemove', (e) => {
+        const r = hero.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5;
+        const y = (e.clientY - r.top) / r.height - .5;
+        orbs.forEach((orb, i) => {
+          const depth = (i + 1) * 12;
+          orb.style.transform = `translate(${x * depth}px, ${y * depth}px)`;
         });
-        hero.addEventListener('mouseleave', () => {
-          orbs.forEach(orb => orb.style.transform = '');
-        });
-      }
+      });
+      hero.addEventListener('mouseleave', () => {
+        orbs.forEach(orb => orb.style.transform = '');
+      });
+    }
 
-      // Scroll parallax en section-glows
-      const glows = document.querySelectorAll('.section-glow');
-      let ticking = false;
-      function updateParallax(){
-        const scrollY = window.scrollY;
-        glows.forEach(glow => {
-          const rect = glow.parentElement.getBoundingClientRect();
-          const progress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-          const offset = (progress - .5) * 80;
-          const dir = glow.classList.contains('left') ? 1 : -1;
-          glow.style.transform = `translate(${offset * dir * .3}px, ${-offset}px)`;
-        });
-        ticking = false;
+    // Scroll parallax en section-glows
+    const glows = document.querySelectorAll('.section-glow');
+    let ticking = false;
+    function updateParallax(){
+      const scrollY = window.scrollY;
+      glows.forEach(glow => {
+        const rect = glow.parentElement.getBoundingClientRect();
+        const progress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+        const offset = (progress - .5) * 80;
+        const dir = glow.classList.contains('left') ? 1 : -1;
+        glow.style.transform = `translate(${offset * dir * .3}px, ${-offset}px)`;
+      });
+      ticking = false;
+    }
+    window.addEventListener('scroll', () => {
+      if(!ticking){
+        requestAnimationFrame(updateParallax);
+        ticking = true;
       }
-      window.addEventListener('scroll', () => {
-        if(!ticking){
-          requestAnimationFrame(updateParallax);
-          ticking = true;
-        }
-      }, {passive:true});
-      updateParallax();
-    })();
-  }
-  if(document.readyState === 'complete'){
-    setTimeout(k2BootDecorativos, 0);
-  } else {
-    window.addEventListener('load', () => setTimeout(k2BootDecorativos, 0));
-  }
+    }, {passive:true});
+    updateParallax();
+  })();
 
   // ---------- PARTÍCULAS HERO (puntos tácticos conectados) ----------
   (function(){
