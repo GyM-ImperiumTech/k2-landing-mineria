@@ -2565,26 +2565,8 @@
     });
   })();
 
-  // ---------- SCROLL REVEAL ----------
-  (function(){
-    const els = document.querySelectorAll('.reveal, section .svc, section .reason, section .cert, .clients-group, .section-head');
-    els.forEach(el => el.classList.add('reveal'));
-    if(!('IntersectionObserver' in window)){
-      els.forEach(el => el.classList.add('in'));
-      return;
-    }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en, i) => {
-        if(en.isIntersecting){
-          setTimeout(() => en.target.classList.add('in'), i * 60);
-          io.unobserve(en.target);
-        }
-      });
-    }, {threshold: .12, rootMargin: '0px 0px -40px 0px'});
-    els.forEach(el => io.observe(el));
-  })();
-
   // ---------- NAV scrolled state ----------
+  // Va sin diferir: es una sola lectura de scrollY, no compite por CPU.
   (function(){
     const nav = document.querySelector('.nav');
     if(!nav) return;
@@ -2593,50 +2575,83 @@
     onScroll();
   })();
 
-  // ---------- PARALLAX: glows y orbes siguen al scroll/mouse ----------
-  (function(){
-    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    // Mouse parallax en hero (orbes)
-    const hero = document.querySelector('.hero');
-    const orbs = document.querySelectorAll('.orb');
-    if(hero && orbs.length){
-      hero.addEventListener('mousemove', (e) => {
-        const r = hero.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - .5;
-        const y = (e.clientY - r.top) / r.height - .5;
-        orbs.forEach((orb, i) => {
-          const depth = (i + 1) * 12;
-          orb.style.transform = `translate(${x * depth}px, ${y * depth}px)`;
-        });
-      });
-      hero.addEventListener('mouseleave', () => {
-        orbs.forEach(orb => orb.style.transform = '');
-      });
-    }
-
-    // Scroll parallax en section-glows
-    const glows = document.querySelectorAll('.section-glow');
-    let ticking = false;
-    function updateParallax(){
-      const scrollY = window.scrollY;
-      glows.forEach(glow => {
-        const rect = glow.parentElement.getBoundingClientRect();
-        const progress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-        const offset = (progress - .5) * 80;
-        const dir = glow.classList.contains('left') ? 1 : -1;
-        glow.style.transform = `translate(${offset * dir * .3}px, ${-offset}px)`;
-      });
-      ticking = false;
-    }
-    window.addEventListener('scroll', () => {
-      if(!ticking){
-        requestAnimationFrame(updateParallax);
-        ticking = true;
+  // ---------- SCROLL REVEAL + PARALLAX: decorativas puras, diferidas ----------
+  // No aportan nada al primer render ni al formulario, y competían por CPU
+  // en el arranque (TBT de 850ms medido en PageSpeed Insights mobile el
+  // 18-sep-2026). Se corren recien tras 'load' -cuando ya no compiten con el
+  // parseo/pintado inicial- con un pequeño setTimeout(0) para salir del
+  // 'load' event y no extenderlo. No toca nada del bloque GA4 TRACKING de
+  // más abajo ni el gtag del <head>: esas dos reglas del README quedan igual.
+  function k2BootDecorativos(){
+    // SCROLL REVEAL
+    (function(){
+      const els = document.querySelectorAll('.reveal, section .svc, section .reason, section .cert, .clients-group, .section-head');
+      els.forEach(el => el.classList.add('reveal'));
+      if(!('IntersectionObserver' in window)){
+        els.forEach(el => el.classList.add('in'));
+        return;
       }
-    }, {passive:true});
-    updateParallax();
-  })();
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((en, i) => {
+          if(en.isIntersecting){
+            setTimeout(() => en.target.classList.add('in'), i * 60);
+            io.unobserve(en.target);
+          }
+        });
+      }, {threshold: .12, rootMargin: '0px 0px -40px 0px'});
+      els.forEach(el => io.observe(el));
+    })();
+
+    // PARALLAX: glows y orbes siguen al scroll/mouse
+    (function(){
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      // Mouse parallax en hero (orbes)
+      const hero = document.querySelector('.hero');
+      const orbs = document.querySelectorAll('.orb');
+      if(hero && orbs.length){
+        hero.addEventListener('mousemove', (e) => {
+          const r = hero.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - .5;
+          const y = (e.clientY - r.top) / r.height - .5;
+          orbs.forEach((orb, i) => {
+            const depth = (i + 1) * 12;
+            orb.style.transform = `translate(${x * depth}px, ${y * depth}px)`;
+          });
+        });
+        hero.addEventListener('mouseleave', () => {
+          orbs.forEach(orb => orb.style.transform = '');
+        });
+      }
+
+      // Scroll parallax en section-glows
+      const glows = document.querySelectorAll('.section-glow');
+      let ticking = false;
+      function updateParallax(){
+        const scrollY = window.scrollY;
+        glows.forEach(glow => {
+          const rect = glow.parentElement.getBoundingClientRect();
+          const progress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+          const offset = (progress - .5) * 80;
+          const dir = glow.classList.contains('left') ? 1 : -1;
+          glow.style.transform = `translate(${offset * dir * .3}px, ${-offset}px)`;
+        });
+        ticking = false;
+      }
+      window.addEventListener('scroll', () => {
+        if(!ticking){
+          requestAnimationFrame(updateParallax);
+          ticking = true;
+        }
+      }, {passive:true});
+      updateParallax();
+    })();
+  }
+  if(document.readyState === 'complete'){
+    setTimeout(k2BootDecorativos, 0);
+  } else {
+    window.addEventListener('load', () => setTimeout(k2BootDecorativos, 0));
+  }
 
   // ---------- PARTÍCULAS HERO (puntos tácticos conectados) ----------
   (function(){
