@@ -2575,34 +2575,37 @@
     onScroll();
   })();
 
-  // ---------- SCROLL REVEAL + PARALLAX: decorativas puras, diferidas ----------
-  // No aportan nada al primer render ni al formulario, y competían por CPU
-  // en el arranque (TBT de 850ms medido en PageSpeed Insights mobile el
-  // 18-sep-2026). Se corren recien tras 'load' -cuando ya no compiten con el
-  // parseo/pintado inicial- con un pequeño setTimeout(0) para salir del
-  // 'load' event y no extenderlo. No toca nada del bloque GA4 TRACKING de
-  // más abajo ni el gtag del <head>: esas dos reglas del README quedan igual.
-  function k2BootDecorativos(){
-    // SCROLL REVEAL
-    (function(){
-      const els = document.querySelectorAll('.reveal, section .svc, section .reason, section .cert, .clients-group, .section-head');
-      els.forEach(el => el.classList.add('reveal'));
-      if(!('IntersectionObserver' in window)){
-        els.forEach(el => el.classList.add('in'));
-        return;
-      }
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((en, i) => {
-          if(en.isIntersecting){
-            setTimeout(() => en.target.classList.add('in'), i * 60);
-            io.unobserve(en.target);
-          }
-        });
-      }, {threshold: .12, rootMargin: '0px 0px -40px 0px'});
-      els.forEach(el => io.observe(el));
-    })();
+  // ---------- SCROLL REVEAL ----------
+  // Sin diferir: se probó diferirla junto al parallax (18-sep-2026) y el CLS
+  // subió de 0 a 0.135 en PageSpeed -- el .reveal que esta linea agrega llega
+  // tarde, así que el navegador ya había pintado esas tarjetas visibles y
+  // luego, de golpe, la clase las oculta y las vuelve a mostrar. Eso SI
+  // compite un poco por CPU en el arranque, pero es preferible a un CLS malo.
+  (function(){
+    const els = document.querySelectorAll('.reveal, section .svc, section .reason, section .cert, .clients-group, .section-head');
+    els.forEach(el => el.classList.add('reveal'));
+    if(!('IntersectionObserver' in window)){
+      els.forEach(el => el.classList.add('in'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en, i) => {
+        if(en.isIntersecting){
+          setTimeout(() => en.target.classList.add('in'), i * 60);
+          io.unobserve(en.target);
+        }
+      });
+    }, {threshold: .12, rootMargin: '0px 0px -40px 0px'});
+    els.forEach(el => io.observe(el));
+  })();
 
-    // PARALLAX: glows y orbes siguen al scroll/mouse
+  // ---------- PARALLAX: decorativo puro, diferido ----------
+  // No aporta nada al primer render ni al formulario, y a diferencia del
+  // reveal no oculta/muestra nada -- solo mueve elementos ya visibles con
+  // transform, así que diferirlo no genera CLS. Corre tras 'load' con un
+  // setTimeout(0) para no extender ese evento. No toca el bloque GA4
+  // TRACKING de más abajo ni el gtag del <head>.
+  function k2BootDecorativos(){
     (function(){
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
