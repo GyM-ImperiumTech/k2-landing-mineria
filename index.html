@@ -2161,8 +2161,28 @@
     if (envios > 0 && puntaje <= mejorPuntaje) return;
     envios++; mejorPuntaje = puntaje;
 
+    // ── El arreglo del 24-sep-2026 ──────────────────────────────────────────
+    // Hermes exige un nombre, o empresa mas un contacto. Este beacon se dispara
+    // con menos que eso: MINIMO es 3 y un telefono valido ya vale 3, asi que
+    // alguien que escribe SOLO su telefono y se va dispara el envio y el intake
+    // responde:
+    //   {"error":"El payload no trae el nombre del lead (name / empresa + contacto)"}
+    //   http=400
+    // Y se pierde EN SILENCIO: sendBeacon no devuelve nada al JS, asi que la
+    // pagina cree que reporto y nadie se entera. Medido el 24-sep contra
+    // produccion: solo-telefono 400, solo-correo 400, nombre+telefono 201.
+    //
+    // Un telefono o un correo validos YA son un lead accionable: el comercial
+    // puede llamar o escribir. Asi que en vez de dejarlo morir se le pone un
+    // nombre que diga exactamente lo que es, y entra marcado con es_parcial.
+    const nombreCrm = nombreReal(d.nombre) ? d.nombre
+                    : (String(d.empresa).trim().length >= 3 ? String(d.empresa).trim()
+                    : 'Sin nombre - ' + (telMarcable(d.telefono) ? d.telefono : d.email));
+
     const payload = JSON.stringify({
       ...d,
+      nombre: nombreCrm,
+      name:   nombreCrm,
       ...getUtms(),
       ...getClickIds(),
       es_parcial: true,
