@@ -3,9 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>K2 Seguridad y Resguardo — Contáctanos</title>
+<title>Seguridad Minera y Patrimonial | K2 Seguridad y Resguardo</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<meta name="description" content="Soluciones de seguridad privada y resguardo para minería, logística, industria y salud. Solicita la llamada de un ejecutivo.">
+<link rel="canonical" href="https://mineria.k2.com.pe/">
+<meta name="description" content="Seguridad minera y patrimonial para operaciones mineras: vigilancia, resguardo y control de accesos, con autorización SUCAMEC. Diagnóstico sin costo.">
+<meta property="og:title" content="Seguridad Minera y Patrimonial | K2 Seguridad y Resguardo">
+<meta property="og:description" content="Vigilancia, resguardo y control de accesos para operaciones mineras, con autorización SUCAMEC.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mineria.k2.com.pe">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Seguridad Minera y Patrimonial",
+  "name": "Seguridad Minera y Patrimonial - K2 Seguridad y Resguardo",
+  "provider": { "@type": "Organization", "name": "K2 Seguridad y Resguardo", "url": "https://k2.com.pe" },
+  "areaServed": "PE",
+  "description": "Servicios de seguridad patrimonial, vigilancia y control de accesos para operaciones mineras, con autorización SUCAMEC.",
+  "url": "https://mineria.k2.com.pe"
+}
+</script>
 <script>
   // Cada visita arranca en el hero, no donde quedó la anterior.
   //
@@ -1479,8 +1496,8 @@
            en 24h") no compartía ni una palabra con el texto visible, así que el
            control por voz no podía activarlo y no se podía seleccionar el texto.
            El CTA explícito está tres líneas más abajo. -->
-      <div class="eyebrow">Seguridad y resguardo para operaciones · Perú</div>
-      <h1 class="hero-title" id="hero-title">Resguardamos tu <em>operación minera</em> donde otros no llegan.</h1>
+      <div class="eyebrow">Seguridad Minera y Patrimonial · Perú</div>
+      <h1 class="hero-title" id="hero-title">Seguridad minera para tu <em>operación</em>, donde otros no llegan.</h1>
       <p class="hero-sub" id="hero-sub"><span class="hero-sub-mobile">Vigilancia armada y protección perimetral 24/7. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, ISO 9001/45001.</span><span class="hero-sub-full">Vigilancia armada, traslado de valores, resguardo de personal clave y protección perimetral 24/7 en los entornos más exigentes del Perú. <strong style="color:#fff;font-weight:500">Personal acreditado por SUCAMEC</strong>, protocolos ISO 9001 / 45001 y respuesta inmediata ante crisis.</span></p>
 
       <div class="hero-ctas">
@@ -2565,7 +2582,22 @@
     });
   })();
 
+  // ---------- NAV scrolled state ----------
+  // Va sin diferir: es una sola lectura de scrollY, no compite por CPU.
+  (function(){
+    const nav = document.querySelector('.nav');
+    if(!nav) return;
+    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 24);
+    window.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+  })();
+
   // ---------- SCROLL REVEAL ----------
+  // Sin diferir: se probó diferirla junto al parallax (18-sep-2026) y el CLS
+  // subió de 0 a 0.135 en PageSpeed -- el .reveal que esta linea agrega llega
+  // tarde, así que el navegador ya había pintado esas tarjetas visibles y
+  // luego, de golpe, la clase las oculta y las vuelve a mostrar. Eso SI
+  // compite un poco por CPU en el arranque, pero es preferible a un CLS malo.
   (function(){
     const els = document.querySelectorAll('.reveal, section .svc, section .reason, section .cert, .clients-group, .section-head');
     els.forEach(el => el.classList.add('reveal'));
@@ -2584,16 +2616,13 @@
     els.forEach(el => io.observe(el));
   })();
 
-  // ---------- NAV scrolled state ----------
-  (function(){
-    const nav = document.querySelector('.nav');
-    if(!nav) return;
-    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 24);
-    window.addEventListener('scroll', onScroll, {passive:true});
-    onScroll();
-  })();
-
   // ---------- PARALLAX: glows y orbes siguen al scroll/mouse ----------
+  // Se probó diferir esto hasta después de 'load' (18-sep-2026) para bajar
+  // el TBT, pero el updateParallax() inicial le pone un transform a los
+  // section-glow recién en ese momento -- el salto de "sin transform" a
+  // "con transform" en un elemento ya pintado también cuenta como CLS
+  // (subió a 0.135 igual que con el reveal diferido). Vuelve a correr
+  // inmediato, como en el original.
   (function(){
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
