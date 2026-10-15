@@ -3,6 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Guardia de entorno (O1-14, 14-oct-2026). Mismo `window.K2_ENV` que
+     seguridad.k2.com.pe, con una diferencia buscada (Plan maestro §7.1): fuera
+     del host productivo GA4 no se apaga, manda con debug_mode:true (se ve en
+     DebugView y el filtro de desarrolladores lo saca de los informes), y Meta,
+     LinkedIn y Clarity no cargan. Sin esto cada prueba desde localhost, una IP o
+     el DNS ec2-* del box dejaba eventos reales en la propiedad 535465340 (14
+     generate_lead de localhost entre el 1-sep y el 13-oct).
+     Como apaga: fbq, lintrk y clarity quedan definidas como funciones mudas
+     ANTES de sus snippets. El de Meta trae `if(f.fbq)return;` y no descarga
+     fbevents.js; los de LinkedIn y Clarity llevan `if (window.K2_ENV === 'prod')`.
+     Lo que se habria mandado queda anotado en window.K2_QA_TAGS.
+     Si esta pagina pasa a servirse en otro host productivo, agregarlo a PROD:
+     si no, ese host deja de medir en silencio. -->
+<script>
+  (function () {
+    var PROD = ['mineria.k2.com.pe'];
+    window.K2_ENV = PROD.indexOf(location.hostname) !== -1 ? 'prod' : 'qa';
+    if (window.K2_ENV === 'prod') return;
+    window.K2_QA_TAGS = [];
+    function muda(nombre) {
+      return function (a, b) { window.K2_QA_TAGS.push([nombre, a, b]); };
+    }
+    window.fbq = muda('fbq');
+    window.lintrk = muda('lintrk');
+    window.clarity = muda('clarity');
+  })();
+</script>
 <title>Seguridad Minera y Patrimonial | K2 Seguridad y Resguardo</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="canonical" href="https://mineria.k2.com.pe/">
@@ -101,6 +128,9 @@
     cfgGa4.k2_trafico     = trafico();
     cfgGa4.k2_tag_version = '1.0.0';
   })();
+  // debug_mode SOLO fuera de produccion (guardia K2_ENV). En produccion no se
+  // pasa `debug_mode:false`: GA4 depura con la sola presencia del parametro.
+  if (window.K2_ENV !== 'prod') cfgGa4.debug_mode = true;
   gtag('config', 'G-JBNFWR6V2T', cfgGa4);
 
   // Destino de Google Ads. Sin esta línea el evento gtag('event','conversion',
@@ -108,7 +138,9 @@
   // hit se pierde en silencio — mismo bug que tuvo agro entre el 8-sep (commit
   // d57b950, sin esta línea) y su corrección posterior. send_page_view:false
   // porque las vistas de página ya las cuenta GA4; acá solo interesa la conversión.
-  gtag('config', 'AW-18438919721', { send_page_view: false });
+  // Fuera de produccion no se carga: una prueba le contaria a Google Ads un
+  // lead falso.
+  if (window.K2_ENV === 'prod') gtag('config', 'AW-18438919721', { send_page_view: false });
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2482,7 +2514,9 @@
     if(typeof gtag === 'function'){
       gtag('event','generate_lead',{currency:'PEN', value:1, lead_id: leadId||'', utm_source: utms.utm_source||'', utm_campaign: utms.utm_campaign||'', sector: payload.sector||'', page_variant: pageVariant});
       // Event snippet for LEAD_MINERIA_LANDING conversion page
-      gtag('event', 'conversion', {'send_to': 'AW-18438919721/AYXRCKqtu_IcEKmsrthE'});
+      // Nunca fuera de produccion (guardia K2_ENV del <head>): G-JBNFWR6V2T
+      // sigue fusionada con AW-18438919721 y la conversion saldria igual.
+      if (window.K2_ENV === 'prod') gtag('event', 'conversion', {'send_to': 'AW-18438919721/AYXRCKqtu_IcEKmsrthE'});
     }
 
     // 4. Insider — retirado 11-ago-2026 por decisión de negocio (ya no se usa la herramienta).
@@ -2954,6 +2988,8 @@ _linkedin_partner_id = "10698761";
 window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
 window._linkedin_data_partner_ids.push(_linkedin_partner_id);
 </script><script type="text/javascript">
+// Solo en produccion: ver la guardia K2_ENV del <head>.
+if (window.K2_ENV === 'prod')
 (function(l) {
 if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
 window.lintrk.q=[]}
@@ -2969,6 +3005,8 @@ s.parentNode.insertBefore(b, s);})(window.lintrk);
 <!-- End LinkedIn Insight Tag -->
 <!-- Microsoft Clarity -->
 <script type="text/javascript">
+    // Solo en produccion: ver la guardia K2_ENV del <head>.
+    if (window.K2_ENV === 'prod')
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
