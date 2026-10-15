@@ -103,11 +103,34 @@
   // de TODAS las superficies, para que la vertical sea un dato y no un contenedor.
   // Equivalente tipado en k2-landing-riesgos/src/lib/nucleo.ts.
   (function(){
+    // O2-07 (D-3): si hay `k2_eid` (URL, sessionStorage o la cookie de
+    // .k2.com.pe que dejan el beacon ABM y los brochures), la persona es un lector
+    // del ABM: k2_audiencia = 'lector_abm'. Solo dice QUIEN es; `k2_trafico` NO se
+    // toca (un lector que vuelve por Google sigue siendo organico). Se mira la
+    // presencia: el valor del eid no viaja a GA4.
+    function audiencia(){
+      try { if (new URLSearchParams(location.search).get('k2_eid')) return 'lector_abm'; } catch(e){}
+      try { if (window.sessionStorage && sessionStorage.getItem('k2_eid')) return 'lector_abm'; } catch(e){}
+      try { if (/(?:^|;\s*)k2_eid=[^;]+/.test(document.cookie)) return 'lector_abm'; } catch(e){}
+      return 'desconocido';
+    }
     function trafico(){
       try {
         var p = new URLSearchParams(location.search);
         var marcas = ['fbclid','gclid','li_fat_id','utm_medium','ttclid','msclkid'];
         for (var i=0;i<marcas.length;i++){ if (p.get(marcas[i])) return 'pauta'; }
+      } catch(e){}
+      // O2-07 (15-oct-2026): `k2_from` marca los enlaces propios que van SIN
+      // utm_source (Plan maestro 5.4): social-{red}-{AAMMDD}, email-{tema}, web.
+      // Va DESPUES de las marcas de pauta (un post promocionado trae su clid y es
+      // pauta) y ANTES del referente (si no, el post organico cae en `organico`).
+      // Un valor que no empieza por social/email/web se ignora y sigue la regla de
+      // siempre.
+      try {
+        var from = (new URLSearchParams(location.search).get('k2_from') || '').toLowerCase();
+        if (/^social(-|$)/.test(from)) return 'social';
+        if (/^email(-|$)/.test(from)) return 'email';
+        if (/^web(-|$)/.test(from)) return 'interno';
       } catch(e){}
       var ref = document.referrer || '';
       if (!ref) return 'directo';
@@ -124,9 +147,9 @@
     // `desconocido` a proposito. Dar por sentado que quien llega por pauta viene a
     // comprar es el error que dejo agosto con 238 leads y 0 comerciales: el publico
     // se declara en el envio, no en la carga.
-    cfgGa4.k2_audiencia   = 'desconocido';
+    cfgGa4.k2_audiencia   = audiencia();
     cfgGa4.k2_trafico     = trafico();
-    cfgGa4.k2_tag_version = '1.0.0';
+    cfgGa4.k2_tag_version = '1.1.0';
   })();
   // debug_mode SOLO fuera de produccion (guardia K2_ENV). En produccion no se
   // pasa `debug_mode:false`: GA4 depura con la sola presencia del parametro.
