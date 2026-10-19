@@ -117,8 +117,16 @@
     function trafico(){
       try {
         var p = new URLSearchParams(location.search);
-        var marcas = ['fbclid','gclid','li_fat_id','utm_medium','ttclid','msclkid'];
+        var marcas = ['fbclid','gclid','li_fat_id','ttclid','msclkid'];
         for (var i=0;i<marcas.length;i++){ if (p.get(marcas[i])) return 'pauta'; }
+        // utm_medium cuenta como pauta por VALOR, no por presencia (19-oct-2026).
+        // Misma regla que el reporte (k2-landing-riesgos 07a10c9, nucleo.ts,
+        // mediumEsPauta): se normaliza -minusculas, sin guiones, guiones bajos ni
+        // espacios- y se compara con los patrones de pago de la agrupacion de
+        // canales de GA4. `social`, `email`, `interno`, `referral`... ya no son
+        // pauta: siguen a k2_from y al referente.
+        var med = (p.get('utm_medium') || '').toLowerCase().replace(/[-_\s]/g, '');
+        if (/^(.*cp.*|ppc|retargeting|paid.*)$/.test(med) || /^(display|banner|expandable|interstitial)$/.test(med)) return 'pauta';
       } catch(e){}
       // O2-07 (15-oct-2026): `k2_from` marca los enlaces propios que van SIN
       // utm_source (Plan maestro 5.4): social-{red}-{AAMMDD}, email-{tema}, web.
@@ -149,7 +157,7 @@
     // se declara en el envio, no en la carga.
     cfgGa4.k2_audiencia   = audiencia();
     cfgGa4.k2_trafico     = trafico();
-    cfgGa4.k2_tag_version = '1.1.0';
+    cfgGa4.k2_tag_version = '1.2.0';
   })();
   // debug_mode SOLO fuera de produccion (guardia K2_ENV). En produccion no se
   // pasa `debug_mode:false`: GA4 depura con la sola presencia del parametro.
