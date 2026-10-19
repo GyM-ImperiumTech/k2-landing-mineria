@@ -117,7 +117,7 @@
         var h = new URL(ref).hostname;
         // Subdominios de K2: comparten la cookie _ga, es la MISMA sesion. Llamarlo
         // organico inventaria una visita nueva y le robaria la conversion al origen.
-        if (h === 'k2.com.pe' || h.slice(-11) === '.k2.com.pe') return 'interno';
+        if (h === 'k2.com.pe' || h.slice(-10) === '.k2.com.pe') return 'interno';
       } catch(e){ return 'directo'; }
       return 'organico';
     }
