@@ -2585,9 +2585,12 @@
     // en el evento que importa.
     const viaOrigen = (() => { try { return sessionStorage.getItem('k2_via') || ''; } catch(e){ return ''; } })();
     const viaCta = (() => { try { return sessionStorage.getItem('k2_via_cta') || ''; } catch(e){ return ''; } })();
+    // li_fat_id y ga_client_id (O2-04) van al CRM, no a la URL de gracias: GA4
+    // archiva la URL en page_location, y el client id no tiene que quedar ahi.
+    const { li_fat_id: _liSoloCrm, ga_client_id: _gaSoloCrm, ...idsGracias } = getClickIds();
     const qs = new URLSearchParams({
       ...utms,
-      ...getClickIds(),
+      ...idsGracias,
       id: eventId,
       crm: leadId ? '1' : '0',
       variant: pageVariant,
