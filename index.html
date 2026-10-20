@@ -2131,6 +2131,11 @@
       fbc:    ck('_fbc'),
       fbclid: p.get('fbclid') || '',
       gclid:  p.get('gclid')  || '',
+      // O2-04 (20-oct): LinkedIn y GA4. Hermes guarda los dos para cruzar el lead
+      // con BigQuery y para la conversion offline de LinkedIn. `_ga` viaja crudo
+      // ("GA1.1.111.222"); Hermes lo normaliza a "111.222".
+      li_fat_id:    p.get('li_fat_id') || ck('li_fat_id') || '',
+      ga_client_id: ck('_ga'),
     };
   }
 
