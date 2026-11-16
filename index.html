@@ -2476,6 +2476,7 @@
       sector: document.getElementById('sector').value.trim(),
       empresa: document.getElementById('empresa').value.trim(),
       comentario: document.getElementById('comentario').value.trim(),
+      consentimiento: !!document.getElementById('consent')?.checked,
       source: 'Landing Minería',
       ...utms,
       ...getClickIds(),
