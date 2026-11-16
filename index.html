@@ -2249,6 +2249,7 @@
 
     const payload = JSON.stringify({
       ...d,
+      consentimiento: !!document.getElementById('consent')?.checked,
       nombre: nombreCrm,
       name:   nombreCrm,
       ...getUtms(),
